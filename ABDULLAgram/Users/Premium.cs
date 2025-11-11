@@ -1,4 +1,4 @@
-namespace ABDULLAgram
+namespace ABDULLAgram.Users
 {
     public class Premium : User
     {

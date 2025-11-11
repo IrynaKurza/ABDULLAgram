@@ -1,4 +1,4 @@
-namespace ABDULLAgram
+namespace ABDULLAgram.Messages
 {
     public class Sent : Message
     {

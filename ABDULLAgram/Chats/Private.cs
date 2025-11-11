@@ -1,4 +1,4 @@
-namespace ABDULLAgram
+namespace ABDULLAgram.Chats
 {
     public class Private : Chat
     {

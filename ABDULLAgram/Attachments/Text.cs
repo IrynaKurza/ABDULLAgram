@@ -1,4 +1,4 @@
-namespace ABDULLAgram
+namespace ABDULLAgram.Attachments
 {
     public class Text
     {
