@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABDULLAgram", "ABDULLAgram\ABDULLAgram.csproj", "{D1075D27-A8C1-4FAC-8E08-588FF72D3042}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABDULLAgram.Tests", "ABDULLAgram.Tests\ABDULLAgram.Tests.csproj", "{7A687C53-A1EC-4839-BF0E-E5DC2DA9152C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1075D27-A8C1-4FAC-8E08-588FF72D3042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1075D27-A8C1-4FAC-8E08-588FF72D3042}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1075D27-A8C1-4FAC-8E08-588FF72D3042}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1075D27-A8C1-4FAC-8E08-588FF72D3042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A687C53-A1EC-4839-BF0E-E5DC2DA9152C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A687C53-A1EC-4839-BF0E-E5DC2DA9152C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A687C53-A1EC-4839-BF0E-E5DC2DA9152C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A687C53-A1EC-4839-BF0E-E5DC2DA9152C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
