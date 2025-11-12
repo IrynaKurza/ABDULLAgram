@@ -2,6 +2,7 @@ namespace ABDULLAgram.Chats
 {
     public class Group : Chat
     {
-        // Attributes will be added later
+        public int MaxParticipants { get; set; } = 100;
+        public string Description { get; set; }
     }
 }

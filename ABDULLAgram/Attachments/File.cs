@@ -2,6 +2,8 @@ namespace ABDULLAgram.Attachments
 {
     public class File
     {
-        // Attributes will be added later
+        public string FileName { get; set; }
+        public string FileExtension { get; set; }
+        public bool IsEncrypted { get; set; }
     }
 }

@@ -2,6 +2,7 @@ namespace ABDULLAgram.Support
 {
     public class Folder
     {
-        // Attributes will be added later
+        public string Name { get; set; }
+        public int MaxChatNumber { get; set; } = 100;
     }
 }

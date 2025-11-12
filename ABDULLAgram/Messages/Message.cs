@@ -2,6 +2,7 @@ namespace ABDULLAgram.Messages
 {
     public abstract class Message
     {
-        // Attributes will be added later
+        public string Id { get; set; }
+        public double MessageSize { get; set; }
     }
 }

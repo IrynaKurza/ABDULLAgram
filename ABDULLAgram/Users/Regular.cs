@@ -2,6 +2,7 @@ namespace ABDULLAgram.Users
 {
     public class Regular : User
     {
-        // Attributes will be added later
+        public int AdFrequency { get; set; }
+        public int MaxStickerPacksSaved { get; set; } = 10;
     }
 }

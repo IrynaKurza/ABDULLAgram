@@ -2,6 +2,7 @@ namespace ABDULLAgram.Chats
 {
     public abstract class Chat
     {
-        // Attributes will be added later
+        public string Name { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
