@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace ABDULLAgram.Attachments
 {
    [Serializable]
@@ -24,7 +20,7 @@ namespace ABDULLAgram.Attachments
     public class Image 
     {
         // Image attributes
-        private Resolution _resolution = new Resolution(1,1);
+        private Resolution _resolution = new(1,1);
         public Resolution Resolution
         {
             get => _resolution;

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace ABDULLAgram.Messages
 {
     [Serializable]
@@ -20,17 +17,34 @@ namespace ABDULLAgram.Messages
             }
         }
 
-        private DateTime _serverReadAt;
-        public DateTime ServerReadAt
+        private DateTime _deliveredAt;
+        public DateTime DeliveredAt
         {
-            get => _serverReadAt;
+            get => _deliveredAt;
             set
             {
                 if (value > DateTime.Now)
-                    throw new ArgumentOutOfRangeException(nameof(ServerReadAt), "ServerReadAt cannot be in the future.");
+                    throw new ArgumentOutOfRangeException(nameof(DeliveredAt), "DeliveredAt cannot be in the future.");
                 if (value < SendTimestamp)
-                    throw new ArgumentOutOfRangeException(nameof(ServerReadAt), "ServerReadAt cannot be earlier than SendTimestamp.");
-                _serverReadAt = value;
+                    throw new ArgumentOutOfRangeException(nameof(DeliveredAt), "DeliveredAt cannot be earlier than SendTimestamp.");
+                _deliveredAt = value;
+            }
+        }
+
+        private DateTime? _editedAt;
+        public DateTime? EditedAt
+        {
+            get => _editedAt;
+            set
+            {
+                if (value is DateTime dt)
+                {
+                    if (dt > DateTime.Now)
+                        throw new ArgumentOutOfRangeException(nameof(EditedAt), "EditedAt cannot be in the future.");
+                    if (dt < SendTimestamp)
+                        throw new ArgumentOutOfRangeException(nameof(EditedAt), "EditedAt cannot be earlier than SendTimestamp.");
+                }
+                _editedAt = value;
             }
         }
 
@@ -50,12 +64,10 @@ namespace ABDULLAgram.Messages
                 _deletedAt = value;
             }
         }
-
-        public bool IsEditedMessage { get; set; }
         
         // Message attributes
         private string _id = Guid.NewGuid().ToString();
-        public string Id
+        public override string Id
         {
             get => _id;
             set
@@ -71,15 +83,14 @@ namespace ABDULLAgram.Messages
                 _id = value;
             }
         }
-        public const long MaxSizeBytes = 10L * 1024 * 1024 * 1024;
 
         private long _messageSize;
-        public long MessageSize => _messageSize;        
+        public override long MessageSize => _messageSize;        
 
         private void SetSize(long bytes)                
         {
             if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > MaxSizeBytes) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
+            if (bytes > MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
             _messageSize = bytes;
         }
 
@@ -94,12 +105,13 @@ namespace ABDULLAgram.Messages
                 throw new InvalidOperationException("Duplicate Id found during load of Sent messages.");
             _extent.Add(s);
         }
-        public Sent(DateTime sendTimestamp, DateTime serverReadAt, DateTime? deletedAt, bool isEdited)
+        
+        public Sent(DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
         {
             SendTimestamp = sendTimestamp;
-            ServerReadAt = serverReadAt;
+            DeliveredAt = deliveredAt;
+            EditedAt = editedAt;
             DeletedAt = deletedAt;
-            IsEditedMessage = isEdited;
             SetSize(0); 
             
             AddToExtent();

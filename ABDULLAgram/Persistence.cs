@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using ABDULLAgram.Users;
 using ABDULLAgram.Attachments;
 using ABDULLAgram.Messages;
@@ -14,7 +10,9 @@ namespace ABDULLAgram
     public class DataSnapshot
     {
         public List<Regular> Regulars { get; set; } = new();
+        public List<Premium> Premiums { get; set; } = new();
         public List<Sent> Sents { get; set; } = new();
+        public List<Draft> Drafts { get; set; } = new();
         public List<Image> Images { get; set; } = new();
     }
 
@@ -31,7 +29,9 @@ namespace ABDULLAgram
             var snap = new DataSnapshot
             {
                 Regulars = new List<Regular>(Regular.GetAll()),
+                Premiums = new List<Premium>(Premium.GetAll()),
                 Sents    = new List<Sent>(Sent.GetAll()),
+                Drafts   = new List<Draft>(Draft.GetAll()),
                 Images   = new List<Image>(Image.GetAll())
             };
 
@@ -45,7 +45,9 @@ namespace ABDULLAgram
             if (!File.Exists(path))
             {
                 Regular.ClearExtent();
+                Premium.ClearExtent();
                 Sent.ClearExtent();
+                Draft.ClearExtent();
                 Image.ClearExtent();
                 return false;
             }
@@ -57,11 +59,15 @@ namespace ABDULLAgram
                 var snap = (DataSnapshot)ser.Deserialize(fs);
 
                 Regular.ClearExtent();
+                Premium.ClearExtent();
                 Sent.ClearExtent();
+                Draft.ClearExtent();
                 Image.ClearExtent();
 
-                foreach (var r in snap.Regulars) Regular.ReAdd(r);  // тут спрацює перевірка унікальності
+                foreach (var r in snap.Regulars) Regular.ReAdd(r);
+                foreach (var p in snap.Premiums) Premium.ReAdd(p);
                 foreach (var s in snap.Sents)    Sent.ReAdd(s);
+                foreach (var d in snap.Drafts)   Draft.ReAdd(d);
                 foreach (var i in snap.Images)   Image.ReAdd(i);
 
                 return true;
@@ -69,7 +75,9 @@ namespace ABDULLAgram
             catch
             {
                 Regular.ClearExtent();
+                Premium.ClearExtent();
                 Sent.ClearExtent();
+                Draft.ClearExtent();
                 Image.ClearExtent();
                 return false;
             }
@@ -79,7 +87,9 @@ namespace ABDULLAgram
         {
             if (File.Exists(path)) File.Delete(path);
             Regular.ClearExtent();
+            Premium.ClearExtent();
             Sent.ClearExtent();
+            Draft.ClearExtent();
             Image.ClearExtent();
         }
     }

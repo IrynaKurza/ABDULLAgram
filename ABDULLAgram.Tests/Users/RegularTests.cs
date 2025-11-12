@@ -1,9 +1,4 @@
-﻿using NUnit.Framework;
-using ABDULLAgram;    
-using ABDULLAgram.Users;
-using System;
-using System.IO;  
-using System.Linq;  
+﻿using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Tests.Users
 {
