@@ -25,4 +25,10 @@
       <ProjectReference Include="..\ABDULLAgram\ABDULLAgram.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Attachments\" />
+      <Folder Include="Chats\" />
+      <Folder Include="Support\" />
+    </ItemGroup>
+
 </Project>
