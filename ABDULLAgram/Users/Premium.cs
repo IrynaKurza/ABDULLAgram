@@ -3,49 +3,19 @@ namespace ABDULLAgram.Users
     [Serializable]
     public class Premium : User
     {
-        // User attributes
-        private string _username = "";
-        public string Username
+        // User attributes override
+        public override string PhoneNumber
         {
-            get => _username;
+            get => base.PhoneNumber;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Username cannot be empty.");
-                _username = value;
-            }
-        }
-
-        private string _phoneNumber = "";
-        public string PhoneNumber
-        {
-            get => _phoneNumber;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("PhoneNumber cannot be empty.");
-               
                 bool exists = _extent.Any(p => !ReferenceEquals(p, this) && p.PhoneNumber == value);
                 if (exists)
                     throw new InvalidOperationException("PhoneNumber must be unique among Premium users.");
                 
-                _phoneNumber = value;
+                base.PhoneNumber = value;
             }
         }
-
-        private DateTime? _lastSeenAt;
-        public DateTime? LastSeenAt
-        {
-            get => _lastSeenAt;
-            set
-            {
-                if (value is DateTime dt && dt > DateTime.Now)
-                    throw new ArgumentOutOfRangeException(nameof(LastSeenAt), "LastSeenAt cannot be in the future.");
-                _lastSeenAt = value;
-            }
-        }
-
-        public bool IsOnline { get; set; }
 
         // Premium attributes
         private DateTime _premiumStartDate;
@@ -74,7 +44,7 @@ namespace ABDULLAgram.Users
             }
         }
 
-        // Derived attribute (no setter)
+        // Derived attribute
         public int RemainingDays => (_premiumEndDate - DateTime.Now).Days;
 
         // Class Extent
