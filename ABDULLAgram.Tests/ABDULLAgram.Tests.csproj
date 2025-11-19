@@ -27,8 +27,6 @@
 
     <ItemGroup>
       <Folder Include="Attachments\" />
-      <Folder Include="Chats\" />
-      <Folder Include="Support\" />
     </ItemGroup>
 
 </Project>
