@@ -3,50 +3,21 @@ namespace ABDULLAgram.Users
     [Serializable]
     public class Regular : User
     {
-        
-        // User attributes
-        private string _username = "";
-        public string Username
+        // User attributes override
+        public override string PhoneNumber
         {
-            get => _username;
+            get => base.PhoneNumber;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Username cannot be empty.");
-                _username = value;
-            }
-        }
-
-        private string _phoneNumber = "";
-        public string PhoneNumber
-        {
-            get => _phoneNumber;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("PhoneNumber cannot be empty.");
-               
+                // First call base to validate "not empty"
+                // Then check uniqueness in this extent
                 bool exists = _extent.Any(r => !ReferenceEquals(r, this) && r.PhoneNumber == value);
                 if (exists)
                     throw new InvalidOperationException("PhoneNumber must be unique among Regular users.");
                 
-                _phoneNumber = value;
+                base.PhoneNumber = value;
             }
         }
-
-        private DateTime? _lastSeenAt;
-        public DateTime? LastSeenAt
-        {
-            get => _lastSeenAt;
-            set
-            {
-                if (value is DateTime dt && dt > DateTime.Now)
-                    throw new ArgumentOutOfRangeException(nameof(LastSeenAt), "LastSeenAt cannot be in the future.");
-                _lastSeenAt = value;
-            }
-        }
-
-        public bool IsOnline { get; set; }
 
         private int _adFrequency;
         public int AdFrequency
@@ -73,9 +44,8 @@ namespace ABDULLAgram.Users
             }
         }
 
-        // Derived attribute (no setter)
+        // Derived attribute
         public string Status => IsOnline ? "Online" : "Offline";
-        
         
         // Class Extent
         private static readonly List<Regular> _extent = new();
@@ -102,6 +72,5 @@ namespace ABDULLAgram.Users
         }
 
         private Regular() {} // For XML serialization
-
     }
 }

@@ -1,8 +1,21 @@
+using System;
+
 namespace ABDULLAgram.Support
 {
     public class Stickerpack
     {
-        public string Name { get; set; }
+        private string _name = "";
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Stickerpack Name cannot be empty.");
+                _name = value;
+            }
+        }
+
         public bool IsPremium { get; set; }
     }
 }
