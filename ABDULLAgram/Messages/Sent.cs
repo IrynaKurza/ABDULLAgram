@@ -3,8 +3,7 @@ namespace ABDULLAgram.Messages
     [Serializable]
     public class Sent : Message
     {
-        
-        // Sent attributes
+        // Sent-specific attributes
         private DateTime _sendTimestamp;
         public DateTime SendTimestamp
         {
@@ -64,37 +63,22 @@ namespace ABDULLAgram.Messages
                 _deletedAt = value;
             }
         }
-        
-        // Message attributes
-        private string _id = Guid.NewGuid().ToString();
+
+        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
         public override string Id
         {
-            get => _id;
+            get => base.Id;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Id cannot be empty.");
-
-                // uniqueness check
                 bool exists = _extent.Any(m => !ReferenceEquals(m, this) && m.Id == value);
                 if (exists)
-                    throw new InvalidOperationException("Message Id must be unique among all Sent messages.");
-
-                _id = value;
+                    throw new InvalidOperationException("Sent Id must be unique among all Sent messages.");
+                
+                base.Id = value; // Calls parent validation
             }
         }
 
-        private long _messageSize;
-        public override long MessageSize => _messageSize;        
-
-        private void SetSize(long bytes)                
-        {
-            if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
-            _messageSize = bytes;
-        }
-
-        // Class extent
+        // Class Extent
         private static readonly List<Sent> _extent = new();
         public static IReadOnlyCollection<Sent> GetAll() => _extent.AsReadOnly();
         private void AddToExtent() => _extent.Add(this);
@@ -105,15 +89,16 @@ namespace ABDULLAgram.Messages
                 throw new InvalidOperationException("Duplicate Id found during load of Sent messages.");
             _extent.Add(s);
         }
-        
+
+        // Constructors
         public Sent(DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
         {
             SendTimestamp = sendTimestamp;
             DeliveredAt = deliveredAt;
             EditedAt = editedAt;
             DeletedAt = deletedAt;
-            SetSize(0); 
-            
+            SetSize(0);
+
             AddToExtent();
         }
 

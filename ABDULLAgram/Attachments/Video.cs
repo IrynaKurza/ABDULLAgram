@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ABDULLAgram.Messages;
-
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
-    public class Video
+    public class Video : Messages.Message
     {
-        // Video attributes
+        // Video-specific attributes
         private string _resolution = "1920x1080";
         public string Resolution
         {
@@ -35,32 +30,18 @@ namespace ABDULLAgram.Attachments
 
         public bool IsStreamingOptimized { get; set; }
 
-        // Message attributes
-        private string _id = Guid.NewGuid().ToString();
-        public string Id
+        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
+        public override string Id
         {
-            get => _id;
+            get => base.Id;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Id cannot be empty.");
-
                 bool exists = _extent.Any(v => !ReferenceEquals(v, this) && v.Id == value);
                 if (exists)
                     throw new InvalidOperationException("Video Id must be unique among all Video messages.");
-
-                _id = value;
+                
+                base.Id = value; // Calls parent validation
             }
-        }
-
-        private long _messageSize;
-        public long MessageSize => _messageSize;
-
-        private void SetSize(long bytes)
-        {
-            if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > Message.MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
-            _messageSize = bytes;
         }
 
         // Class Extent

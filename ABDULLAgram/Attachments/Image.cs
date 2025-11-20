@@ -1,6 +1,6 @@
 namespace ABDULLAgram.Attachments
 {
-   [Serializable]
+    [Serializable]
     public class Resolution
     {
         public int Width { get; set; }
@@ -12,15 +12,16 @@ namespace ABDULLAgram.Attachments
         {
             if (width <= 0 || height <= 0)
                 throw new ArgumentOutOfRangeException("Resolution must be positive.");
-            Width = width; Height = height;
+            Width = width; 
+            Height = height;
         }
     }
 
     [Serializable]
-    public class Image 
+    public class Image : ABDULLAgram.Messages.Message
     {
-        // Image attributes
-        private Resolution _resolution = new(1,1);
+        // Image-specific attributes
+        private Resolution _resolution = new Resolution(1, 1);
         public Resolution Resolution
         {
             get => _resolution;
@@ -42,44 +43,15 @@ namespace ABDULLAgram.Attachments
         public bool IsEdited { get; set; }
         public bool IsMarked { get; set; }
 
-        // Multi-Value
+        // Multi-Value attribute
         private readonly List<string> _variants = new();
         public IReadOnlyList<string> Variants => _variants.AsReadOnly();
 
-        
-        // Message attributes 
-        private string _id = Guid.NewGuid().ToString();
-        public string Id
-        {
-            get => _id;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Id cannot be empty.");
-
-                bool exists = _extent.Any(i => !ReferenceEquals(i, this) && i.Id == value);
-                if (exists)
-                    throw new InvalidOperationException("Image Id must be unique among all Image messages.");
-
-                _id = value;
-            }
-        }
-
-        public const long MaxSizeBytes = 10L * 1024 * 1024 * 1024;
-
-        private long _messageSize;
-        public long MessageSize => _messageSize;
-
-        private void SetSize(long bytes)
-        {
-            if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > MaxSizeBytes) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
-            _messageSize = bytes;
-        }
-
         public void SetVariants(IEnumerable<string> variants)
         {
-            if (variants is null) throw new ArgumentNullException(nameof(variants));
+            if (variants is null) 
+                throw new ArgumentNullException(nameof(variants));
+            
             var list = variants.Select(v =>
             {
                 if (string.IsNullOrWhiteSpace(v))
@@ -105,6 +77,20 @@ namespace ABDULLAgram.Attachments
 
         public bool RemoveVariant(string variant) => _variants.Remove(variant);
 
+        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
+        public override string Id
+        {
+            get => base.Id;
+            set
+            {
+                bool exists = _extent.Any(i => !ReferenceEquals(i, this) && i.Id == value);
+                if (exists)
+                    throw new InvalidOperationException("Image Id must be unique among all Image messages.");
+                
+                base.Id = value; // Calls parent validation
+            }
+        }
+
         // Class Extent
         private static readonly List<Image> _extent = new();
         public static IReadOnlyCollection<Image> GetAll() => _extent.AsReadOnly();
@@ -116,6 +102,8 @@ namespace ABDULLAgram.Attachments
                 throw new InvalidOperationException("Duplicate Id found during load of Images.");
             _extent.Add(i);
         }
+
+        // Constructors
         public Image(Resolution resolution, string format, IEnumerable<string> initialVariants)
         {
             Resolution = resolution;

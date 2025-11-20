@@ -14,6 +14,10 @@ namespace ABDULLAgram
         public List<Sent> Sents { get; set; } = new();
         public List<Draft> Drafts { get; set; } = new();
         public List<Image> Images { get; set; } = new();
+        public List<Text> Texts { get; set; } = new();
+        public List<Video> Videos { get; set; } = new();
+        public List<ABDULLAgram.Attachments.File> Files { get; set; } = new();
+        public List<Sticker> Stickers { get; set; } = new();
     }
 
     public static class Persistence
@@ -32,7 +36,11 @@ namespace ABDULLAgram
                 Premiums = new List<Premium>(Premium.GetAll()),
                 Sents    = new List<Sent>(Sent.GetAll()),
                 Drafts   = new List<Draft>(Draft.GetAll()),
-                Images   = new List<Image>(Image.GetAll())
+                Images   = new List<Image>(Image.GetAll()),
+                Texts    = new List<Text>(Text.GetAll()),
+                Videos   = new List<Video>(Video.GetAll()),
+                Files    = new List<ABDULLAgram.Attachments.File>(ABDULLAgram.Attachments.File.GetAll()),
+                Stickers = new List<Sticker>(Sticker.GetAll())
             };
 
             var serializer = new XmlSerializer(typeof(DataSnapshot));
@@ -49,6 +57,10 @@ namespace ABDULLAgram
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
+                Text.ClearExtent();
+                Video.ClearExtent();
+                ABDULLAgram.Attachments.File.ClearExtent();
+                Sticker.ClearExtent();
                 return false;
             }
 
@@ -63,12 +75,20 @@ namespace ABDULLAgram
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
+                Text.ClearExtent();
+                Video.ClearExtent();
+                ABDULLAgram.Attachments.File.ClearExtent();
+                Sticker.ClearExtent();
 
                 foreach (var r in snap.Regulars) Regular.ReAdd(r);
                 foreach (var p in snap.Premiums) Premium.ReAdd(p);
                 foreach (var s in snap.Sents)    Sent.ReAdd(s);
                 foreach (var d in snap.Drafts)   Draft.ReAdd(d);
                 foreach (var i in snap.Images)   Image.ReAdd(i);
+                foreach (var t in snap.Texts)    Text.ReAdd(t);
+                foreach (var v in snap.Videos)   Video.ReAdd(v);
+                foreach (var f in snap.Files)    ABDULLAgram.Attachments.File.ReAdd(f);
+                foreach (var st in snap.Stickers) Sticker.ReAdd(st);
 
                 return true;
             }
@@ -79,6 +99,10 @@ namespace ABDULLAgram
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
+                Text.ClearExtent();
+                Video.ClearExtent();
+                ABDULLAgram.Attachments.File.ClearExtent();
+                Sticker.ClearExtent();
                 return false;
             }
         }
@@ -91,6 +115,10 @@ namespace ABDULLAgram
             Sent.ClearExtent();
             Draft.ClearExtent();
             Image.ClearExtent();
+            Text.ClearExtent();
+            Video.ClearExtent();
+            ABDULLAgram.Attachments.File.ClearExtent();
+            Sticker.ClearExtent();
         }
     }
 }

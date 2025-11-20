@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ABDULLAgram.Messages;
-
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
-    public class Text
+    public class Text : Messages.Message
     {
-        // Text attributes
+        // Text-specific attributes
         public const int MaximumLength = 2000;
 
         public bool ContainsLink { get; set; }
@@ -30,32 +25,18 @@ namespace ABDULLAgram.Attachments
         // Derived attribute
         public int Length => TextContent.Length;
 
-        // Message attributes
-        private string _id = Guid.NewGuid().ToString();
-        public string Id
+        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
+        public override string Id
         {
-            get => _id;
+            get => base.Id;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Id cannot be empty.");
-
                 bool exists = _extent.Any(t => !ReferenceEquals(t, this) && t.Id == value);
                 if (exists)
                     throw new InvalidOperationException("Text Id must be unique among all Text messages.");
-
-                _id = value;
+                
+                base.Id = value; // Calls parent validation
             }
-        }
-
-        private long _messageSize;
-        public long MessageSize => _messageSize;
-
-        private void SetSize(long bytes)
-        {
-            if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > Message.MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
-            _messageSize = bytes;
         }
 
         // Class Extent
@@ -75,7 +56,7 @@ namespace ABDULLAgram.Attachments
         {
             TextContent = textContent;
             ContainsLink = containsLink;
-            SetSize(textContent.Length); // Approximate size based on character count
+            SetSize(textContent.Length);
 
             AddToExtent();
         }
