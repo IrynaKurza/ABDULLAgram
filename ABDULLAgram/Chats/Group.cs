@@ -1,5 +1,3 @@
-using System;
-
 namespace ABDULLAgram.Chats
 {
     public class Group : Chat

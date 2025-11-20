@@ -1,10 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.IO;
-using System.Collections.Generic;
-using NUnit.Framework;
-using ABDULLAgram.Users;
-using ABDULLAgram; // For Persistence
+﻿using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Tests.Users
 {
@@ -53,7 +47,7 @@ namespace ABDULLAgram.Tests.Users
             var view = Regular.GetAll();
 
             Assert.Throws<NotSupportedException>(() =>
-                ((System.Collections.Generic.ICollection<Regular>)view).Add(r));
+                ((ICollection<Regular>)view).Add(r));
         }
     }
 
@@ -91,57 +85,99 @@ namespace ABDULLAgram.Tests.Users
             Assert.That(all.Any(r => r.Username == "alice" && r.IsOnline && r.LastSeenAt != null));
             Assert.That(all.Any(r => r.Username == "bob" && !r.IsOnline && r.LastSeenAt == null));
         }
+
+        [Test]
+        public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
+        {
+            new Regular("temp", "+999", false, 9);
+
+            var ok = Persistence.LoadAll("__does_not_exist__.xml");
+
+            Assert.IsFalse(ok);
+            Assert.That(Regular.GetAll(), Is.Empty);
+        }
+
+        [Test]
+        public void Save_ThrowsException_IfPathInvalid()
+        {
+            new Regular("err", "+999", true, 1);
+
+            Assert.Throws<DirectoryNotFoundException>(() =>
+                Persistence.SaveAll("Z:/folder_does_not_exist/regulars.xml"));
+        }
     }
     
     [TestFixture]
-    public class UserValidationTests
+    public class RegularValidationTests
     {
-        [SetUp] public void Setup() => Regular.ClearExtent();
+        [SetUp] 
+        public void Setup() => Regular.ClearExtent();
 
         [Test]
-        public void User_SetUsername_Empty_Throws()
+        public void Ctor_EmptyUsername_Throws()
         {
-            // Valid case
+            Assert.Throws<ArgumentException>(() =>
+                new Regular("", "+111", true, 1));
+        }
+
+        [Test]
+        public void Ctor_EmptyPhone_Throws()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Regular("alice", "   ", true, 1));
+        }
+
+        [Test]
+        public void Set_Username_Empty_Throws()
+        {
             var r = new Regular("valid", "+111", true, 1);
             
-            // Invalid cases (Base class logic)
             Assert.Throws<ArgumentException>(() => r.Username = "");
             Assert.Throws<ArgumentException>(() => r.Username = "   ");
-            Assert.Throws<ArgumentException>(() => new Regular("", "+222", true, 1));
         }
 
         [Test]
-        public void User_SetPhoneNumber_Empty_Throws()
+        public void Set_PhoneNumber_Empty_Throws()
         {
-            // Valid case
             var r = new Regular("valid", "+111", true, 1);
 
-            // Invalid cases (Base class logic)
             Assert.Throws<ArgumentException>(() => r.PhoneNumber = "");
-            Assert.Throws<ArgumentException>(() => new Regular("valid", "", true, 1));
         }
 
         [Test]
-        public void User_SetLastSeenAt_Future_Throws()
+        public void Set_LastSeenAt_Future_Throws()
         {
             var r = new Regular("alice", "+111", true, 1);
             
-            // Valid
+            // Valid case
             r.LastSeenAt = DateTime.Now.AddMinutes(-1);
 
-            // Invalid (Base class logic)
+            // Invalid case
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 r.LastSeenAt = DateTime.Now.AddDays(1));
         }
 
         [Test]
-        public void Regular_PhoneNumber_Duplicate_Throws()
+        public void Set_AdFrequency_Negative_Throws()
         {
-            // This tests that the overridden logic in Regular still works
+            var r = new Regular("alice", "+111", true, 1);
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                r.AdFrequency = -1);
+        }
+
+        [Test]
+        public void Set_MaxStickerPacksSaved_Negative_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                Regular.MaxStickerPacksSaved = -5);
+        }
+        
+        [Test]
+        public void Ctor_DuplicatePhone_Throws()
+        {
             var _ = new Regular("alice", "+111", true, 1);
-            
             Assert.Throws<InvalidOperationException>(() =>
-                new Regular("bob", "+111", false, 2)); // Duplicate check
+                new Regular("bob", "+111", false, 2)); 
         }
     }
 }

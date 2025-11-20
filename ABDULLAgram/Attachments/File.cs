@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ABDULLAgram.Messages;
-
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
-    public class File
+    public class File : Messages.Message
     {
-        // File attributes
+        // File-specific attributes
         private string _fileName = "";
         public string FileName
         {
@@ -35,32 +30,18 @@ namespace ABDULLAgram.Attachments
 
         public bool IsEncrypted { get; set; }
 
-        // Message attributes
-        private string _id = Guid.NewGuid().ToString();
-        public string Id
+        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
+        public override string Id
         {
-            get => _id;
+            get => base.Id;
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Id cannot be empty.");
-
                 bool exists = _extent.Any(f => !ReferenceEquals(f, this) && f.Id == value);
                 if (exists)
                     throw new InvalidOperationException("File Id must be unique among all File messages.");
-
-                _id = value;
+                
+                base.Id = value; // Calls parent validation
             }
-        }
-
-        private long _messageSize;
-        public long MessageSize => _messageSize;
-
-        private void SetSize(long bytes)
-        {
-            if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes));
-            if (bytes > Message.MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB.");
-            _messageSize = bytes;
         }
 
         // Class Extent
