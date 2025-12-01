@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ABDULLAgram.Support;
+using ABDULLAgram.Attachments;
 
 namespace ABDULLAgram.Users
 {
@@ -45,9 +46,8 @@ namespace ABDULLAgram.Users
         }
 
         public bool IsOnline { get; set; }
-        
-        private readonly HashSet<Folder> _folders = new();
 
+        private readonly HashSet<Folder> _folders = new();
         public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
 
         internal void AddFolderInternal(Folder folder)
@@ -82,6 +82,21 @@ namespace ABDULLAgram.Users
             {
                 _folders.Remove(folder);
             }
+        }
+
+        private readonly HashSet<Text> _mentionedInTexts = new();
+        public IReadOnlyCollection<Text> MentionedInTexts => _mentionedInTexts.ToList().AsReadOnly();
+
+        internal void AddMentionedInText(Text text)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            _mentionedInTexts.Add(text);
+        }
+
+        internal void RemoveMentionedInText(Text text)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            _mentionedInTexts.Remove(text);
         }
     }
 }
