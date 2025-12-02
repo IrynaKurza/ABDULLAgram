@@ -18,10 +18,10 @@ namespace ABDULLAgram.Attachments
     }
 
     [Serializable]
-    public class Image : ABDULLAgram.Messages.Message
+    public class Image : Messages.Message
     {
         // Image-specific attributes
-        private Resolution _resolution = new Resolution(1, 1);
+        private Resolution _resolution = new(1, 1);
         public Resolution Resolution
         {
             get => _resolution;
