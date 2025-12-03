@@ -38,7 +38,7 @@ namespace ABDULLAgram.Tests.Messages
             var view = Sent.GetAll();
 
             Assert.Throws<NotSupportedException>(() =>
-                ((System.Collections.Generic.ICollection<Sent>)view).Add(sent));
+                ((ICollection<Sent>)view).Add(sent));
         }
     }
 

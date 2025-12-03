@@ -4,12 +4,12 @@ namespace ABDULLAgram.Users
     public class Premium : User
     {
         // User attributes override
-        public override string PhoneNumber
+        public sealed override string PhoneNumber
         {
             get => base.PhoneNumber;
             set
             {
-                bool exists = _extent.Any(p => !ReferenceEquals(p, this) && p.PhoneNumber == value);
+                bool exists = Extent.Any(p => !ReferenceEquals(p, this) && p.PhoneNumber == value);
                 if (exists)
                     throw new InvalidOperationException("PhoneNumber must be unique among Premium users.");
                 
@@ -47,17 +47,20 @@ namespace ABDULLAgram.Users
         // Derived attribute
         public int RemainingDays => (_premiumEndDate - DateTime.Now).Days;
 
-        // Class Extent
-        private static readonly List<Premium> _extent = new();
-        public static IReadOnlyCollection<Premium> GetAll() => _extent.AsReadOnly();
+        // Override abstract property from User - Premium users have unlimited packs
+        public override int MaxSavedStickerpacks => int.MaxValue;
 
-        private void AddToExtent() => _extent.Add(this);
-        public static void ClearExtent() => _extent.Clear();
+        // Class Extent
+        private static readonly List<Premium> Extent = new();
+        public static IReadOnlyCollection<Premium> GetAll() => Extent.AsReadOnly();
+
+        private void AddToExtent() => Extent.Add(this);
+        public static void ClearExtent() => Extent.Clear();
         public static void ReAdd(Premium p)
         {
-            if (_extent.Any(x => x.PhoneNumber == p.PhoneNumber && !ReferenceEquals(x, p)))
+            if (Extent.Any(x => x.PhoneNumber == p.PhoneNumber && !ReferenceEquals(x, p)))
                 throw new InvalidOperationException("Duplicate PhoneNumber found during Load.");
-            _extent.Add(p);
+            Extent.Add(p);
         }
 
         // Constructors
