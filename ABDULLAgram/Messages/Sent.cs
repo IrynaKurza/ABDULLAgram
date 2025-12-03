@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Messages
 {
     [Serializable]
@@ -91,7 +94,8 @@ namespace ABDULLAgram.Messages
         }
 
         // Constructors
-        public Sent(DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
+        public Sent(User sender, Chat chat, DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
+            : base(sender, chat)
         {
             SendTimestamp = sendTimestamp;
             DeliveredAt = deliveredAt;

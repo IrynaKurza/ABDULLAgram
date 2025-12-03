@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Messages
 {
     [Serializable]
@@ -43,7 +46,8 @@ namespace ABDULLAgram.Messages
         }
 
         // Constructors
-        public Draft(DateTime lastSaveTimestamp)
+        public Draft(User sender, Chat chat, DateTime lastSaveTimestamp)
+            : base(sender, chat)
         {
             LastSaveTimestamp = lastSaveTimestamp;
             SetSize(0);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ABDULLAgram.Chats;
 using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Attachments
@@ -76,6 +77,9 @@ namespace ABDULLAgram.Attachments
         }
 
         public Text(string textContent, bool containsLink)
+        // Constructors
+        public Text(User sender, Chat chat, string textContent, bool containsLink)
+            : base(sender, chat)
         {
             TextContent = textContent;
             ContainsLink = containsLink;
