@@ -5,8 +5,8 @@ using NUnit.Framework;
 
 namespace ABDULLAgram.Tests.Support
 {
-    internal class TestUser : User
-    {
+    internal class TestUser : Regular { 
+        public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
     }
 
     [TestFixture]
@@ -15,7 +15,7 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void CreateFolder_WithValidName_CreatesFolderAndRegistersOnUser()
         {
-            var user = new TestUser();
+            var user = new TestUser("Alice");
 
             var folder = user.CreateFolder("Work");
 
@@ -28,7 +28,7 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void CreateFolder_WithEmptyOrWhitespaceName_ThrowsArgumentException()
         {
-            var user = new TestUser();
+            var user = new TestUser("Alice");
 
             Assert.Throws<ArgumentException>(() => user.CreateFolder(""));
             Assert.Throws<ArgumentException>(() => user.CreateFolder("   "));
@@ -37,7 +37,7 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void Set_Name_EmptyOrWhitespace_ThrowsArgumentException()
         {
-            var user = new TestUser();
+            var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
 
             Assert.Throws<ArgumentException>(() => folder.Name = "");
@@ -47,7 +47,7 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void Set_Name_Valid_UpdatesValue()
         {
-            var user = new TestUser();
+            var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
 
             folder.Name = "Travel";
@@ -58,7 +58,7 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void DeleteFolder_RemovesFolderFromUser()
         {
-            var user = new TestUser();
+            var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
 
             user.DeleteFolder(folder);
@@ -69,8 +69,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void DeleteFolder_ForFolderNotOwnedByUser_ThrowsInvalidOperationException()
         {
-            var owner = new TestUser();
-            var anotherUser = new TestUser();
+            var owner = new TestUser("Alice");
+            var anotherUser = new TestUser("Bob");
             var folder = owner.CreateFolder("Work");
 
             Assert.Throws<InvalidOperationException>(() => anotherUser.DeleteFolder(folder));

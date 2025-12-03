@@ -122,7 +122,8 @@ namespace ABDULLAgram.Chats
         internal void RemoveMemberInternal(string phoneNumber)
         {
             _members.Remove(phoneNumber);
-        
+        }
+
         // 1. Reverse Connection: A Chat knows its history
         private readonly List<Message> _history = new();
 

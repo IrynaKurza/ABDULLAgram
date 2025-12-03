@@ -75,8 +75,7 @@ namespace ABDULLAgram.Attachments
             _mentionedUsers.Remove(user);
             user.RemoveMentionedInText(this);
         }
-
-        public Text(string textContent, bool containsLink)
+        
         // Constructors
         public Text(User sender, Chat chat, string textContent, bool containsLink)
             : base(sender, chat)

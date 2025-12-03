@@ -148,6 +148,8 @@ namespace ABDULLAgram.Users
         internal void RemoveStickerpackInternal(Stickerpack pack)
         {
             _savedStickerpacks.Remove(pack);
+        }
+
         private readonly HashSet<Folder> _folders = new();
         public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
 
@@ -198,7 +200,8 @@ namespace ABDULLAgram.Users
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             _mentionedInTexts.Remove(text);
-        
+        }
+
         // Reverse Connection: A User knows about the messages they sent
         private readonly List<Message> _messages = new();
         

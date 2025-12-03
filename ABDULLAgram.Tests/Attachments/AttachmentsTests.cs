@@ -1,12 +1,29 @@
 ﻿using System;
 using ABDULLAgram.Attachments;
 using ABDULLAgram.Users;
+using ABDULLAgram.Chats; // Added to support Chat class
 using NUnit.Framework;
 
 namespace ABDULLAgram.Tests.Attachments
 {
     internal class TestUserForText : User
     {
+        public override int MaxSavedStickerpacks => 10;
+
+        public TestUserForText()
+        {
+            Username = "TestUser";
+            PhoneNumber = "555-0199"; 
+            IsOnline = true;
+        }
+    }
+
+    internal class TestChat : Chat
+    {
+        public TestChat()
+        {
+            Name = "Test Chat";
+        }
     }
 
     [TestFixture]
@@ -22,7 +39,9 @@ namespace ABDULLAgram.Tests.Attachments
         public void AddMentionedUser_UpdatesBothSides()
         {
             var user = new TestUserForText();
-            var text = new Text("Hello @user", false);
+            var chat = new TestChat();
+            
+            var text = new Text(user, chat, "Hello @user", false);
 
             text.AddMentionedUser(user);
 
@@ -34,7 +53,9 @@ namespace ABDULLAgram.Tests.Attachments
         public void RemoveMentionedUser_UpdatesBothSides()
         {
             var user = new TestUserForText();
-            var text = new Text("Hello @user", false);
+            var chat = new TestChat();
+            
+            var text = new Text(user, chat, "Hello @user", false);
             text.AddMentionedUser(user);
 
             text.RemoveMentionedUser(user);
@@ -47,7 +68,9 @@ namespace ABDULLAgram.Tests.Attachments
         public void AddMentionedUser_Duplicate_ThrowsInvalidOperationException()
         {
             var user = new TestUserForText();
-            var text = new Text("Hello @user", false);
+            var chat = new TestChat();
+            
+            var text = new Text(user, chat, "Hello @user", false);
             text.AddMentionedUser(user);
 
             Assert.Throws<InvalidOperationException>(() => text.AddMentionedUser(user));
@@ -57,7 +80,9 @@ namespace ABDULLAgram.Tests.Attachments
         public void RemoveMentionedUser_NotPresent_ThrowsInvalidOperationException()
         {
             var user = new TestUserForText();
-            var text = new Text("Hello @user", false);
+            var chat = new TestChat();
+            
+            var text = new Text(user, chat, "Hello @user", false);
 
             Assert.Throws<InvalidOperationException>(() => text.RemoveMentionedUser(user));
         }
@@ -65,7 +90,10 @@ namespace ABDULLAgram.Tests.Attachments
         [Test]
         public void AddMentionedUser_Null_ThrowsArgumentNullException()
         {
-            var text = new Text("Hello", false);
+            var user = new TestUserForText();
+            var chat = new TestChat();
+
+            var text = new Text(user, chat, "Hello", false);
 
             Assert.Throws<ArgumentNullException>(() => text.AddMentionedUser(null));
         }
