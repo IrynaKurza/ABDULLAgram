@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
@@ -57,7 +60,8 @@ namespace ABDULLAgram.Attachments
         }
 
         // Constructors
-        public File(string fileName, string fileExtension, bool isEncrypted)
+        public File(User sender, Chat chat, string fileName, string fileExtension, bool isEncrypted)
+            : base(sender, chat)
         {
             FileName = fileName;
             FileExtension = fileExtension;

@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
@@ -52,7 +55,8 @@ namespace ABDULLAgram.Attachments
         }
 
         // Constructors
-        public Text(string textContent, bool containsLink)
+        public Text(User sender, Chat chat, string textContent, bool containsLink)
+            : base(sender, chat)
         {
             TextContent = textContent;
             ContainsLink = containsLink;

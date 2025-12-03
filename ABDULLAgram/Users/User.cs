@@ -1,5 +1,10 @@
+using System.Xml.Serialization;
+using ABDULLAgram.Messages;
+
 namespace ABDULLAgram.Users
 {
+    [XmlInclude(typeof(Regular))]
+    [XmlInclude(typeof(Premium))]
     [Serializable]
     public abstract class User
     {
@@ -40,5 +45,26 @@ namespace ABDULLAgram.Users
         }
 
         public bool IsOnline { get; set; }
+        
+        // Reverse Connection: A User knows about the messages they sent
+        private readonly List<Message> _messages = new();
+        
+        public IReadOnlyList<Message> SentMessages => _messages.AsReadOnly();
+        
+        internal void AddMessage(Message message)
+        {
+            if (!_messages.Contains(message))
+            {
+                _messages.Add(message);
+            }
+        }
+        
+        internal void RemoveMessage(Message message)
+        {
+            if (_messages.Contains(message))
+            {
+                _messages.Remove(message);
+            }
+        }
     }
 }
