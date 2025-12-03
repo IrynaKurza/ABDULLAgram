@@ -12,6 +12,13 @@ namespace ABDULLAgram.Tests.Support
     [TestFixture]
     public class FolderTests
     {
+        // Clear previous users before every test to prevent phone number collisions
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+        }
+
         [Test]
         public void CreateFolder_WithValidName_CreatesFolderAndRegistersOnUser()
         {
