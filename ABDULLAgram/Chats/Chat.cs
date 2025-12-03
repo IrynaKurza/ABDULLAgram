@@ -1,7 +1,12 @@
 using ABDULLAgram.Users;
+using System.Xml.Serialization;
+using ABDULLAgram.Messages;
 
 namespace ABDULLAgram.Chats
 {
+    [XmlInclude(typeof(Group))]
+    [XmlInclude(typeof(Private))]
+    [Serializable]
     public abstract class Chat
     {
         private string _name = "";
@@ -117,6 +122,27 @@ namespace ABDULLAgram.Chats
         internal void RemoveMemberInternal(string phoneNumber)
         {
             _members.Remove(phoneNumber);
+        
+        // 1. Reverse Connection: A Chat knows its history
+        private readonly List<Message> _history = new();
+
+        // This represents the {History} association constraint
+        public IReadOnlyList<Message> History => _history.AsReadOnly();
+
+        internal void AddMessage(Message message)
+        {
+            if (!_history.Contains(message))
+            {
+                _history.Add(message);
+            }
+        }
+
+        internal void RemoveMessage(Message message)
+        {
+            if (_history.Contains(message))
+            {
+                _history.Remove(message);
+            }
         }
     }
 }

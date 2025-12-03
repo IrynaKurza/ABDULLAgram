@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
@@ -57,7 +60,8 @@ namespace ABDULLAgram.Attachments
         }
 
         // Constructors
-        public Video(string resolution, double durationSec, bool isStreamingOptimized)
+        public Video(User sender, Chat chat, string resolution, double durationSec, bool isStreamingOptimized)
+            : base(sender, chat)
         {
             Resolution = resolution;
             DurationSec = durationSec;
