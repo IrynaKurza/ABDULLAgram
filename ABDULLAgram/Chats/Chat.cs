@@ -37,10 +37,7 @@ namespace ABDULLAgram.Chats
         // QUALIFIED ASSOCIATION: Chat ↔ User (qualified by phoneNumber)
         // ============================================================
         
-        // Dictionary stores users indexed by their phone number
         private Dictionary<string, User> _members = new Dictionary<string, User>();
-
-        // Public getter returns read-only view
         public IReadOnlyDictionary<string, User> Members => _members;
 
         protected Chat() 
@@ -58,15 +55,11 @@ namespace ABDULLAgram.Chats
 
             if (string.IsNullOrWhiteSpace(user.PhoneNumber))
                 throw new ArgumentException("User must have a valid phone number.");
-
-            // Check if this phone number already exists in the chat
+            
             if (_members.ContainsKey(user.PhoneNumber))
                 throw new InvalidOperationException($"A user with phone number {user.PhoneNumber} is already a member of this chat.");
-
-            // Add to this chat's members dictionary
+            
             _members.Add(user.PhoneNumber, user);
-
-            // REVERSE CONNECTION: Tell user about this chat
             user.AddChatInternal(this);
         }
 
@@ -81,12 +74,11 @@ namespace ABDULLAgram.Chats
 
             User user = _members[phoneNumber];
             _members.Remove(phoneNumber);
-
-            // REVERSE CONNECTION: Tell user to forget this chat
+            
             user.RemoveChatInternal(this);
         }
 
-        // Get user by phone number (qualified lookup) - THIS IS THE KEY FEATURE!
+        // Get user by phone number (qualified lookup) 
         public User? GetMemberByPhoneNumber(string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -123,11 +115,10 @@ namespace ABDULLAgram.Chats
         {
             _members.Remove(phoneNumber);
         }
-
-        // 1. Reverse Connection: A Chat knows its history
+        
         private readonly List<Message> _history = new();
 
-        // This represents the {History} association constraint
+        // {History} association constraint
         public IReadOnlyList<Message> History => _history.AsReadOnly();
 
         internal void AddMessage(Message message)
