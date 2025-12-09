@@ -51,6 +51,15 @@ namespace ABDULLAgram.Attachments
 
             AddToExtent();
         }
+        
+        // If we dont want to specify who sent this sticker. For example, when we just add it to StickerPack
+        public Sticker(BackgroundTypeEnum backgroundType)
+        {
+            BackgroundType = backgroundType;
+            SetSize(0);
+
+            AddToExtent();
+        }
 
         private Sticker() { } // for XML serialization
     }
