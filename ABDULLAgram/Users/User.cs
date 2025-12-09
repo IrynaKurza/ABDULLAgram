@@ -63,6 +63,28 @@ namespace ABDULLAgram.Users
 
         public bool IsOnline { get; set; }
 
+        // Reflex Association
+        private List<User> _blockedUsers = new();
+        private List<User> _blockedBy = new();
+
+        public void BlockUser(User user)
+        {
+            if (user == this)
+                throw new InvalidOperationException("Cannot block yourself.");
+            if (_blockedUsers.Contains(user)) return;
+            _blockedUsers.Add(user);
+            user._blockedBy.Add(this);
+        }
+
+        public void UnblockUser(User user)
+        {
+            if (!_blockedUsers.Contains(user)) return;
+            _blockedUsers.Remove(user);
+            user._blockedBy.Remove(this);
+        }
+
+        public IReadOnlyCollection<User> GetBlockedUsers() => _blockedUsers.AsReadOnly();
+        public IReadOnlyCollection<User> GetBlockedBy() => _blockedBy.AsReadOnly();
         // ============================================================
         // QUALIFIED ASSOCIATION: User ↔ Chat (reverse connection)
         // ============================================================

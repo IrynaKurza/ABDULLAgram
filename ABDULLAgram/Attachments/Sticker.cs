@@ -1,3 +1,4 @@
+using ABDULLAgram.Support;
 using ABDULLAgram.Chats;
 using ABDULLAgram.Users;
 
@@ -10,6 +11,10 @@ namespace ABDULLAgram.Attachments
 
         // Sticker-specific attributes
         public BackgroundTypeEnum BackgroundType { get; set; }
+
+        // Aggregation reverse link
+        [System.Xml.Serialization.XmlIgnore]
+        public Stickerpack? BelongsToPack { get; internal set; }
 
         // Override Id to add uniqueness check (like Regular does with PhoneNumber)
         public override string Id

@@ -1,3 +1,4 @@
+using ABDULLAgram.Attachments;
 using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Support
@@ -18,6 +19,29 @@ namespace ABDULLAgram.Support
 
         public bool IsPremium { get; set; }
 
+        // Aggregation
+        private List<Sticker> _stickers = new();
+
+        public void AddSticker(Sticker sticker)
+        {
+            if (_stickers.Count >= 50)
+                throw new InvalidOperationException("Stickerpack cannot have more than 50 stickers.");
+            if (_stickers.Contains(sticker)) return;
+            sticker.BelongsToPack?.RemoveSticker(sticker);
+            _stickers.Add(sticker);
+            sticker.BelongsToPack = this;
+        }
+
+        public void RemoveSticker(Sticker sticker)
+        {
+            if (!_stickers.Contains(sticker)) return;
+            if (_stickers.Count <= 1)
+                throw new InvalidOperationException("Stickerpack must have at least 1 sticker.");
+            _stickers.Remove(sticker);
+            sticker.BelongsToPack = null;
+        }
+
+        public IReadOnlyCollection<Sticker> GetStickers() => _stickers.AsReadOnly();
         // ==== BASIC ASSOCIATION ====
         private HashSet<User> _savedByUsers = new HashSet<User>();
         public IReadOnlyCollection<User> SavedByUsers => _savedByUsers.ToList().AsReadOnly();
