@@ -4,14 +4,14 @@ namespace ABDULLAgram.Users
     public class Regular : User
     {
         // User attributes override
-        public override string PhoneNumber
+        public sealed override string PhoneNumber
         {
             get => base.PhoneNumber;
             set
             {
                 // First call base to validate "not empty"
                 // Then check uniqueness in this extent
-                bool exists = _extent.Any(r => !ReferenceEquals(r, this) && r.PhoneNumber == value);
+                bool exists = Extent.Any(r => !ReferenceEquals(r, this) && r.PhoneNumber == value);
                 if (exists)
                     throw new InvalidOperationException("PhoneNumber must be unique among Regular users.");
                 
@@ -44,20 +44,23 @@ namespace ABDULLAgram.Users
             }
         }
 
+        // Override abstract property from User - Regular users limited to 10 packs
+        public override int MaxSavedStickerpacks => MaxStickerPacksSaved;
+
         // Derived attribute
         public string Status => IsOnline ? "Online" : "Offline";
         
         // Class Extent
-        private static readonly List<Regular> _extent = new();
-        public static IReadOnlyCollection<Regular> GetAll() => _extent.AsReadOnly();
+        private static readonly List<Regular> Extent = new();
+        public static IReadOnlyCollection<Regular> GetAll() => Extent.AsReadOnly();
 
-        private void AddToExtent() => _extent.Add(this);
-        public static void ClearExtent() => _extent.Clear();
+        private void AddToExtent() => Extent.Add(this);
+        public static void ClearExtent() => Extent.Clear();
         public static void ReAdd(Regular r)
         {
-            if (_extent.Any(x => x.PhoneNumber == r.PhoneNumber && !ReferenceEquals(x, r)))
+            if (Extent.Any(x => x.PhoneNumber == r.PhoneNumber && !ReferenceEquals(x, r)))
                 throw new InvalidOperationException("Duplicate PhoneNumber found during Load.");
-            _extent.Add(r);
+            Extent.Add(r);
         }
 
         // Constructors

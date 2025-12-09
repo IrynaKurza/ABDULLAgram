@@ -1,4 +1,6 @@
 using ABDULLAgram.Support;
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Attachments
 {
@@ -41,7 +43,8 @@ namespace ABDULLAgram.Attachments
         }
 
         // Constructors
-        public Sticker(BackgroundTypeEnum backgroundType)
+        public Sticker(User sender, Chat chat, BackgroundTypeEnum backgroundType)
+            : base(sender, chat)
         {
             BackgroundType = backgroundType;
             SetSize(0);

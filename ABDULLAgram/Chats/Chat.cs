@@ -1,5 +1,12 @@
+using ABDULLAgram.Users;
+using System.Xml.Serialization;
+using ABDULLAgram.Messages;
+
 namespace ABDULLAgram.Chats
 {
+    [XmlInclude(typeof(Group))]
+    [XmlInclude(typeof(Private))]
+    [Serializable]
     public abstract class Chat
     {
         private string _name = "";
@@ -26,9 +33,108 @@ namespace ABDULLAgram.Chats
             }
         }
 
+        // ============================================================
+        // QUALIFIED ASSOCIATION: Chat ↔ User (qualified by phoneNumber)
+        // ============================================================
+        
+        private Dictionary<string, User> _members = new Dictionary<string, User>();
+        public IReadOnlyDictionary<string, User> Members => _members;
+
         protected Chat() 
         {
             _createdAt = DateTime.Now;
+        }
+
+        // ==== PUBLIC METHODS ====
+        
+        // Add user to chat by phoneNumber (qualified association)
+        public void AddMember(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+
+            if (string.IsNullOrWhiteSpace(user.PhoneNumber))
+                throw new ArgumentException("User must have a valid phone number.");
+            
+            if (_members.ContainsKey(user.PhoneNumber))
+                throw new InvalidOperationException($"A user with phone number {user.PhoneNumber} is already a member of this chat.");
+            
+            _members.Add(user.PhoneNumber, user);
+            user.AddChatInternal(this);
+        }
+
+        // Remove user from chat by phoneNumber
+        public void RemoveMember(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                throw new ArgumentException("Phone number cannot be empty.");
+
+            if (!_members.ContainsKey(phoneNumber))
+                throw new InvalidOperationException($"No user with phone number {phoneNumber} found in this chat.");
+
+            User user = _members[phoneNumber];
+            _members.Remove(phoneNumber);
+            
+            user.RemoveChatInternal(this);
+        }
+
+        // Get user by phone number (qualified lookup) 
+        public User? GetMemberByPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return null;
+
+            return _members.ContainsKey(phoneNumber) ? _members[phoneNumber] : null;
+        }
+
+        // Update user's phone number in the dictionary
+        public void UpdateMemberPhoneNumber(string oldPhoneNumber, string newPhoneNumber)
+        {
+            if (!_members.ContainsKey(oldPhoneNumber))
+                throw new InvalidOperationException($"No user with phone number {oldPhoneNumber} found in this chat.");
+
+            if (_members.ContainsKey(newPhoneNumber) && oldPhoneNumber != newPhoneNumber)
+                throw new InvalidOperationException($"A user with phone number {newPhoneNumber} already exists in this chat.");
+
+            User user = _members[oldPhoneNumber];
+            _members.Remove(oldPhoneNumber);
+            _members.Add(newPhoneNumber, user);
+        }
+
+        // ==== INTERNAL METHODS (called by User) ====
+        
+        internal void AddMemberInternal(User user)
+        {
+            if (!_members.ContainsKey(user.PhoneNumber))
+            {
+                _members.Add(user.PhoneNumber, user);
+            }
+        }
+
+        internal void RemoveMemberInternal(string phoneNumber)
+        {
+            _members.Remove(phoneNumber);
+        }
+        
+        private readonly List<Message> _history = new();
+
+        // {History} association constraint
+        public IReadOnlyList<Message> History => _history.AsReadOnly();
+
+        internal void AddMessage(Message message)
+        {
+            if (!_history.Contains(message))
+            {
+                _history.Add(message);
+            }
+        }
+
+        internal void RemoveMessage(Message message)
+        {
+            if (_history.Contains(message))
+            {
+                _history.Remove(message);
+            }
         }
     }
 }

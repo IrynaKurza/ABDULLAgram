@@ -1,3 +1,6 @@
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
@@ -18,10 +21,10 @@ namespace ABDULLAgram.Attachments
     }
 
     [Serializable]
-    public class Image : ABDULLAgram.Messages.Message
+    public class Image : Messages.Message
     {
         // Image-specific attributes
-        private Resolution _resolution = new Resolution(1, 1);
+        private Resolution _resolution = new(1, 1);
         public Resolution Resolution
         {
             get => _resolution;
@@ -104,7 +107,8 @@ namespace ABDULLAgram.Attachments
         }
 
         // Constructors
-        public Image(Resolution resolution, string format, IEnumerable<string> initialVariants)
+        public Image(User sender, Chat chat, Resolution resolution, string format, IEnumerable<string> initialVariants)
+            : base(sender, chat)
         {
             Resolution = resolution;
             Format = format;

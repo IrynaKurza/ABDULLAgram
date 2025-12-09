@@ -1,9 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
+
 namespace ABDULLAgram.Attachments
 {
     [Serializable]
     public class Text : Messages.Message
     {
-        // Text-specific attributes
         public const int MaximumLength = 2000;
 
         public bool ContainsLink { get; set; }
@@ -22,10 +27,8 @@ namespace ABDULLAgram.Attachments
             }
         }
 
-        // Derived attribute
         public int Length => TextContent.Length;
 
-        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
         public override string Id
         {
             get => base.Id;
@@ -34,12 +37,11 @@ namespace ABDULLAgram.Attachments
                 bool exists = _extent.Any(t => !ReferenceEquals(t, this) && t.Id == value);
                 if (exists)
                     throw new InvalidOperationException("Text Id must be unique among all Text messages.");
-                
-                base.Id = value; // Calls parent validation
+
+                base.Id = value;
             }
         }
 
-        // Class Extent
         private static readonly List<Text> _extent = new();
         public static IReadOnlyCollection<Text> GetAll() => _extent.AsReadOnly();
         private void AddToExtent() => _extent.Add(this);
@@ -51,8 +53,32 @@ namespace ABDULLAgram.Attachments
             _extent.Add(t);
         }
 
+        private readonly HashSet<User> _mentionedUsers = new();
+        public IReadOnlyCollection<User> MentionedUsers => _mentionedUsers.ToList().AsReadOnly();
+
+        public void AddMentionedUser(User user)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (_mentionedUsers.Contains(user))
+                throw new InvalidOperationException("User is already mentioned in this text.");
+
+            _mentionedUsers.Add(user);
+            user.AddMentionedInText(this);
+        }
+
+        public void RemoveMentionedUser(User user)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (!_mentionedUsers.Contains(user))
+                throw new InvalidOperationException("User is not mentioned in this text.");
+
+            _mentionedUsers.Remove(user);
+            user.RemoveMentionedInText(this);
+        }
+        
         // Constructors
-        public Text(string textContent, bool containsLink)
+        public Text(User sender, Chat chat, string textContent, bool containsLink)
+            : base(sender, chat)
         {
             TextContent = textContent;
             ContainsLink = containsLink;
@@ -61,6 +87,6 @@ namespace ABDULLAgram.Attachments
             AddToExtent();
         }
 
-        private Text() { } // for XML serialization
+        private Text() { }
     }
 }
