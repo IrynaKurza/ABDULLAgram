@@ -1,13 +1,17 @@
-﻿using ABDULLAgram.Messages;
-using ABDULLAgram.Users;
+﻿using ABDULLAgram.Users;
 using ABDULLAgram.Chats;
-using ABDULLAgram.Attachments;
 
 namespace ABDULLAgram.Tests.Messages
 {
+    // ============================================================
+    // BASIC ASSOCIATION TESTS: Message → User and Message → Chat
+    // Tests bidirectional links established by Message constructor
+    // ============================================================
+    
     [TestFixture]
     public class MessageAssociationTests
     {
+        // Test helper classes
         private class TestUser : Regular { 
             public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
         }
@@ -33,27 +37,32 @@ namespace ABDULLAgram.Tests.Messages
             _chat2 = new TestChat();
         }
 
+        // TEST: Constructor establishes BOTH associations automatically
         [Test]
         public void Constructor_Establishes_DoubleLinks()
         {
             // Act
             var msg = new TestMessage(_user1, _chat1);
 
+            // Assert - Message knows sender and chat
             Assert.That(msg.Sender, Is.EqualTo(_user1));
             Assert.That(msg.TargetChat, Is.EqualTo(_chat1));
 
+            // Assert - REVERSE CONNECTIONS: User and Chat know about message
             Assert.That(_user1.SentMessages, Contains.Item(msg));
-            
             Assert.That(_chat1.History, Contains.Item(msg));
         }
 
+        // TEST: Constructor validates required associations
         [Test]
         public void Constructor_NullArguments_ThrowsException()
         {
+            // Act & Assert - Message MUST have sender and chat
             Assert.Throws<ArgumentNullException>(() => new TestMessage(null, _chat1));
             Assert.Throws<ArgumentNullException>(() => new TestMessage(_user1, null));
         }
 
+        // TEST: REASSIGNMENT - Changing sender updates reverse connections
         [Test]
         public void Changing_Sender_Updates_ReverseConnections()
         {
@@ -62,16 +71,17 @@ namespace ABDULLAgram.Tests.Messages
             // Act: Change sender from Alice to Bob
             msg.Sender = _user2;
 
-            // Assert
+            // Assert - New sender is set
             Assert.That(msg.Sender, Is.EqualTo(_user2));
             
-            // Alice should no longer have the message
+            // Assert - Old sender doesn't have message anymore
             Assert.That(_user1.SentMessages, Does.Not.Contain(msg));
             
-            // Bob should now have the message
+            // Assert - New sender has the message
             Assert.That(_user2.SentMessages, Contains.Item(msg));
         }
 
+        // TEST: REASSIGNMENT - Changing chat updates history in both chats
         [Test]
         public void Changing_Chat_Updates_History()
         {
@@ -80,11 +90,12 @@ namespace ABDULLAgram.Tests.Messages
             // Act: Move message to Chat 2
             msg.TargetChat = _chat2;
 
-            // Assert
+            // Assert - Removed from old chat, added to new chat
             Assert.That(_chat1.History, Does.Not.Contain(msg));
             Assert.That(_chat2.History, Contains.Item(msg));
         }
 
+        // TEST: Delete removes ALL bidirectional links
         [Test]
         public void Delete_Removes_All_Links()
         {
@@ -93,7 +104,7 @@ namespace ABDULLAgram.Tests.Messages
             // Act
             msg.Delete();
 
-            // Assert
+            // Assert - All connections severed
             Assert.That(_user1.SentMessages, Is.Empty);
             Assert.That(_chat1.History, Is.Empty);
         }

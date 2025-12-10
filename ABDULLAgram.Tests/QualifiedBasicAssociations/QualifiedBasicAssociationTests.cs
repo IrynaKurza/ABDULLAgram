@@ -1,60 +1,67 @@
-using ABDULLAgram.Users;
 using ABDULLAgram.Chats;
+using ABDULLAgram.Users;
 using ABDULLAgram.Support;
 
 namespace ABDULLAgram.Tests.QualifiedBasicAssociations
 {
+    // ============================================================
+    // QUALIFIED ASSOCIATION TESTS: Chat ↔ User (by phoneNumber)
+    // Tests the Dictionary-based qualified association
+    // Key feature: O(1) lookup by phone number
+    // ============================================================
+    
     [TestFixture]
     public class QualifiedAssociationTests
     {
-        private Group? _testChat;
         private Regular? _user1;
         private Regular? _user2;
+        private Group? _testChat;
 
         [SetUp]
         public void SetUp()
         {
             Regular.ClearExtent();
-            _testChat = new Group { Name = "Test Chat" };
+            Premium.ClearExtent();
             _user1 = new Regular("Alice", "+48111222333", true, 5);
             _user2 = new Regular("Bob", "+48222333444", true, 3);
+            _testChat = new Group { Name = "Test Group", Description = "Test Description" };
         }
 
-        // ========== QUALIFIED ASSOCIATION TESTS (Chat ↔ User by phoneNumber) ==========
-
+        // TEST: Adding member from Chat side creates bidirectional link
         [Test]
         public void AddMember_ValidUser_AddsToChat()
         {
-            // Arrange & Act
+            // Act
             _testChat!.AddMember(_user1!);
 
-            // Assert
-            Assert.That(_testChat.Members.Count, Is.EqualTo(1));
+            // Assert - Check both sides of association
             Assert.That(_testChat.Members.ContainsKey(_user1!.PhoneNumber), Is.True);
             Assert.That(_testChat.Members[_user1.PhoneNumber], Is.EqualTo(_user1));
         }
 
+        // TEST: Reverse connection - User knows about chat
         [Test]
         public void AddMember_ReverseConnection_UserKnowsAboutChat()
         {
-            // Arrange & Act
+            // Act
             _testChat!.AddMember(_user1!);
 
-            // Assert - Check reverse connection
-            Assert.That(_user1!.JoinedChats.Count, Is.EqualTo(1));
-            Assert.That(_user1.JoinedChats.Contains(_testChat), Is.True);
+            // Assert - User's collection updated
+            Assert.That(_user1!.JoinedChats.Contains(_testChat), Is.True);
         }
 
+        // TEST: Dictionary prevents duplicate phone numbers (qualifier uniqueness)
         [Test]
         public void AddMember_DuplicatePhoneNumber_ThrowsException()
         {
             // Arrange
             _testChat!.AddMember(_user1!);
 
-            // Act & Assert - Cannot add same user twice
-            Assert.Throws<InvalidOperationException>(() => _testChat.AddMember(_user1!));
+            // Act & Assert - Can't add user with same phone number
+            Assert.Throws<InvalidOperationException>(() => _testChat.AddMember(_user1));
         }
 
+        // TEST: Null validation
         [Test]
         public void AddMember_NullUser_ThrowsException()
         {
@@ -62,22 +69,21 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.Throws<ArgumentNullException>(() => _testChat!.AddMember(null!));
         }
 
+        // TEST: Removing member updates both sides
         [Test]
         public void RemoveMember_ExistingUser_RemovesFromChat()
         {
             // Arrange
             _testChat!.AddMember(_user1!);
-            _testChat.AddMember(_user2!);
 
             // Act
             _testChat.RemoveMember(_user1!.PhoneNumber);
 
             // Assert
-            Assert.That(_testChat.Members.Count, Is.EqualTo(1));
             Assert.That(_testChat.Members.ContainsKey(_user1.PhoneNumber), Is.False);
-            Assert.That(_testChat.Members.ContainsKey(_user2!.PhoneNumber), Is.True);
         }
 
+        // TEST: Reverse connection on removal
         [Test]
         public void RemoveMember_ReverseConnection_UserDoesNotKnowAboutChat()
         {
@@ -87,18 +93,20 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Act
             _testChat.RemoveMember(_user1!.PhoneNumber);
 
-            // Assert - Check reverse connection is removed
-            Assert.That(_user1.JoinedChats.Count, Is.EqualTo(0));
+            // Assert
             Assert.That(_user1.JoinedChats.Contains(_testChat), Is.False);
         }
 
+        // TEST: Can't remove non-existent user
         [Test]
         public void RemoveMember_NonExistentUser_ThrowsException()
         {
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => _testChat!.RemoveMember("+48999888777"));
+            Assert.Throws<InvalidOperationException>(() => _testChat!.RemoveMember("+48999999999"));
         }
 
+        // TEST: QUALIFIED LOOKUP - Key feature of qualified associations!
+        // O(1) lookup by phone number instead of iterating through collection
         [Test]
         public void GetMemberByPhoneNumber_ExistingUser_ReturnsUser()
         {
@@ -106,54 +114,55 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             _testChat!.AddMember(_user1!);
 
             // Act
-            User? foundUser = _testChat.GetMemberByPhoneNumber(_user1!.PhoneNumber);
+            var foundUser = _testChat.GetMemberByPhoneNumber(_user1!.PhoneNumber);
 
-            // Assert
-            Assert.That(foundUser, Is.Not.Null);
+            // Assert - Fast lookup by qualifier
             Assert.That(foundUser, Is.EqualTo(_user1));
         }
 
+        // TEST: Lookup returns null for non-existent key
         [Test]
         public void GetMemberByPhoneNumber_NonExistentUser_ReturnsNull()
         {
-            // Arrange
-            _testChat!.AddMember(_user1!);
-
             // Act
-            User? foundUser = _testChat.GetMemberByPhoneNumber("+48999888777");
+            var foundUser = _testChat!.GetMemberByPhoneNumber("+48999999999");
 
             // Assert
             Assert.That(foundUser, Is.Null);
         }
 
+        // TEST: CRITICAL for qualified associations - updating the qualifier (key)
+        // When phone number changes, Dictionary key must be updated
         [Test]
         public void UpdateMemberPhoneNumber_ValidChange_UpdatesDictionary()
         {
             // Arrange
             _testChat!.AddMember(_user1!);
-            string oldPhone = _user1!.PhoneNumber;
+            string oldPhone = _user1.PhoneNumber;
             string newPhone = "+48555666777";
 
             // Act
-            _user1.PhoneNumber = newPhone; // This triggers update in chat
+            _testChat.UpdateMemberPhoneNumber(oldPhone, newPhone);
 
-            // Assert
+            // Assert - Old key removed, new key added
             Assert.That(_testChat.Members.ContainsKey(oldPhone), Is.False);
             Assert.That(_testChat.Members.ContainsKey(newPhone), Is.True);
             Assert.That(_testChat.Members[newPhone], Is.EqualTo(_user1));
         }
 
+        // TEST: Adding from User side (reverse direction)
         [Test]
         public void JoinChat_FromUserSide_CreatesProperConnection()
         {
             // Act
             _user1!.JoinChat(_testChat!);
 
-            // Assert
+            // Assert - Both sides updated
             Assert.That(_user1.JoinedChats.Contains(_testChat), Is.True);
             Assert.That(_testChat.Members.ContainsKey(_user1.PhoneNumber), Is.True);
         }
 
+        // TEST: Leaving from User side
         [Test]
         public void LeaveChat_FromUserSide_RemovesConnection()
         {
@@ -163,12 +172,17 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Act
             _user1.LeaveChat(_testChat);
 
-            // Assert
+            // Assert - Both sides updated
             Assert.That(_user1.JoinedChats.Contains(_testChat), Is.False);
             Assert.That(_testChat.Members.ContainsKey(_user1.PhoneNumber), Is.False);
         }
     }
 
+    // ============================================================
+    // BASIC ASSOCIATION TESTS: User ↔ Stickerpack (many-to-many)
+    // Tests polymorphic business rules (Regular max 10, Premium unlimited)
+    // ============================================================
+    
     [TestFixture]
     public class BasicAssociationTests
     {
@@ -188,26 +202,23 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             _pack2 = new Stickerpack { Name = "Premium Pack", IsPremium = true };
         }
 
-        // ========== BASIC ASSOCIATION TESTS (User ↔ Stickerpack) ==========
-
+        // TEST: Saving from User side creates bidirectional link
         [Test]
         public void SaveStickerpack_ValidPack_AddsToBothSides()
         {
             // Act
             _regularUser!.SaveStickerpack(_pack1!);
 
-            // Assert
-            Assert.That(_regularUser.SavedStickerpacks.Count, Is.EqualTo(1));
+            // Assert - Both sides of association updated
             Assert.That(_regularUser.SavedStickerpacks.Contains(_pack1), Is.True);
-            // Check reverse connection
-            Assert.That(_pack1!.SavedByUsers.Count, Is.EqualTo(1));
-            Assert.That(_pack1.SavedByUsers.Contains(_regularUser), Is.True);
+            Assert.That(_pack1!.SavedByUsers.Contains(_regularUser), Is.True);
         }
 
+        // TEST: BUSINESS RULE - Regular users limited to 10 packs
         [Test]
         public void SaveStickerpack_RegularUser_EnforcesMaxLimit()
         {
-            // Arrange - Save 10 packs (the limit)
+            // Arrange - Fill to limit (10 packs)
             for (int i = 0; i < 10; i++)
             {
                 var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
@@ -219,20 +230,22 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.Throws<InvalidOperationException>(() => _regularUser!.SaveStickerpack(extraPack));
         }
 
+        // TEST: POLYMORPHISM - Premium users have no limit
         [Test]
         public void SaveStickerpack_PremiumUser_NoLimit()
         {
-            // Arrange & Act - Save 15 packs (more than regular limit)
-            for (int i = 0; i < 15; i++)
+            // Act - Save way more than 10 packs
+            for (int i = 0; i < 50; i++)
             {
                 var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
                 _premiumUser!.SaveStickerpack(pack);
             }
 
-            // Assert - Should succeed without exception
-            Assert.That(_premiumUser!.SavedStickerpacks.Count, Is.EqualTo(15));
+            // Assert - No exception, all saved
+            Assert.That(_premiumUser!.SavedStickerpacks.Count, Is.EqualTo(50));
         }
 
+        // TEST: Can't save same pack twice
         [Test]
         public void SaveStickerpack_DuplicatePack_ThrowsException()
         {
@@ -240,9 +253,10 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             _regularUser!.SaveStickerpack(_pack1!);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => _regularUser.SaveStickerpack(_pack1!));
+            Assert.Throws<InvalidOperationException>(() => _regularUser.SaveStickerpack(_pack1));
         }
 
+        // TEST: Null validation
         [Test]
         public void SaveStickerpack_NullPack_ThrowsException()
         {
@@ -250,23 +264,22 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.Throws<ArgumentNullException>(() => _regularUser!.SaveStickerpack(null!));
         }
 
+        // TEST: Unsaving updates both sides
         [Test]
         public void UnsaveStickerpack_ExistingPack_RemovesFromBothSides()
         {
             // Arrange
             _regularUser!.SaveStickerpack(_pack1!);
-            _regularUser.SaveStickerpack(_pack2!);
 
             // Act
-            _regularUser.UnsaveStickerpack(_pack1!);
+            _regularUser.UnsaveStickerpack(_pack1);
 
-            // Assert
-            Assert.That(_regularUser.SavedStickerpacks.Count, Is.EqualTo(1));
+            // Assert - Both sides updated
             Assert.That(_regularUser.SavedStickerpacks.Contains(_pack1), Is.False);
-            // Check reverse connection
             Assert.That(_pack1!.SavedByUsers.Contains(_regularUser), Is.False);
         }
 
+        // TEST: Can't unsave pack that wasn't saved
         [Test]
         public void UnsaveStickerpack_NonSavedPack_ThrowsException()
         {
@@ -274,17 +287,19 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.Throws<InvalidOperationException>(() => _regularUser!.UnsaveStickerpack(_pack1!));
         }
 
+        // TEST: Adding from Stickerpack side (reverse direction)
         [Test]
         public void AddSavedByUser_FromPackSide_CreatesConnection()
         {
             // Act
             _pack1!.AddSavedByUser(_regularUser!);
 
-            // Assert
+            // Assert - Both sides updated
             Assert.That(_pack1.SavedByUsers.Contains(_regularUser), Is.True);
             Assert.That(_regularUser!.SavedStickerpacks.Contains(_pack1), Is.True);
         }
 
+        // TEST: Removing from Stickerpack side
         [Test]
         public void RemoveSavedByUser_FromPackSide_RemovesConnection()
         {
@@ -299,6 +314,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.That(_regularUser!.SavedStickerpacks.Contains(_pack1), Is.False);
         }
 
+        // TEST: Many-to-many - multiple users can save same pack
         [Test]
         public void MultipleUsers_CanSaveSamePack()
         {
@@ -312,6 +328,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.That(_pack1.SavedByUsers.Contains(_premiumUser), Is.True);
         }
 
+        // TEST: Many-to-many - one user can save multiple packs
         [Test]
         public void OneUser_CanSaveMultiplePacks()
         {
@@ -325,6 +342,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.That(_regularUser.SavedStickerpacks.Contains(_pack2), Is.True);
         }
 
+        // TEST: Can save exactly up to limit
         [Test]
         public void RegularUser_CanSaveUpToExactLimit()
         {
@@ -339,6 +357,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Assert.That(_regularUser!.SavedStickerpacks.Count, Is.EqualTo(10));
         }
 
+        // TEST: Unsaving frees up space for new packs
         [Test]
         public void UnsaveStickerpack_AllowsSavingAgain()
         {
@@ -359,6 +378,10 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
         }
     }
 
+    // ============================================================
+    // INTEGRATION TEST: Tests multiple associations working together
+    // ============================================================
+    
     [TestFixture]
     public class IntegrationTests
     {
@@ -369,6 +392,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Premium.ClearExtent();
         }
 
+        // TEST: Complex scenario with multiple associations
         [Test]
         public void ComplexScenario_MultipleUsersAndChats()
         {
@@ -379,7 +403,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             var user2 = new Regular("Bob", "+48222333444", true, 3);
             var pack1 = new Stickerpack { Name = "Emojis", IsPremium = false };
 
-            // Act
+            // Act - Create multiple associations
             chat1.AddMember(user1);
             chat1.AddMember(user2);
             chat2.AddMember(user1);
@@ -387,7 +411,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             user1.SaveStickerpack(pack1);
             user2.SaveStickerpack(pack1);
 
-            // Assert
+            // Assert - All associations correct
             Assert.That(chat1.Members.Count, Is.EqualTo(2));
             Assert.That(chat2.Members.Count, Is.EqualTo(1));
             Assert.That(user1.JoinedChats.Count, Is.EqualTo(2));

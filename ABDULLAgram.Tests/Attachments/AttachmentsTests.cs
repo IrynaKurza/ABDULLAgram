@@ -1,8 +1,6 @@
-﻿using System;
-using ABDULLAgram.Attachments;
+﻿using ABDULLAgram.Attachments;
 using ABDULLAgram.Users;
-using ABDULLAgram.Chats; // Added to support Chat class
-using NUnit.Framework;
+using ABDULLAgram.Chats;
 
 namespace ABDULLAgram.Tests.Attachments
 {
@@ -26,6 +24,11 @@ namespace ABDULLAgram.Tests.Attachments
         }
     }
 
+    // ============================================================
+    // BASIC ASSOCIATION TESTS: Text ↔ User (mentions)
+    // Tests many-to-many association for user mentions in text
+    // ============================================================
+    
     [TestFixture]
     public class AttachmentsTests
     {
@@ -35,6 +38,7 @@ namespace ABDULLAgram.Tests.Attachments
             Text.ClearExtent();
         }
 
+        // TEST: Adding mention creates bidirectional link
         [Test]
         public void AddMentionedUser_UpdatesBothSides()
         {
@@ -43,12 +47,15 @@ namespace ABDULLAgram.Tests.Attachments
             
             var text = new Text(user, chat, "Hello @user", false);
 
+            // Act
             text.AddMentionedUser(user);
 
-            Assert.That(text.MentionedUsers, Does.Contain(user));
-            Assert.That(user.MentionedInTexts, Does.Contain(text));
+            // Assert - Both sides updated
+            Assert.That(text.MentionedUsers, Does.Contain(user)); // Text knows user
+            Assert.That(user.MentionedInTexts, Does.Contain(text)); // User knows text
         }
 
+        // TEST: Removing mention updates both sides
         [Test]
         public void RemoveMentionedUser_UpdatesBothSides()
         {
@@ -58,12 +65,15 @@ namespace ABDULLAgram.Tests.Attachments
             var text = new Text(user, chat, "Hello @user", false);
             text.AddMentionedUser(user);
 
+            // Act
             text.RemoveMentionedUser(user);
 
+            // Assert - Both sides updated
             Assert.That(text.MentionedUsers, Does.Not.Contain(user));
             Assert.That(user.MentionedInTexts, Does.Not.Contain(text));
         }
 
+        // TEST: Can't mention same user twice
         [Test]
         public void AddMentionedUser_Duplicate_ThrowsInvalidOperationException()
         {
@@ -73,9 +83,11 @@ namespace ABDULLAgram.Tests.Attachments
             var text = new Text(user, chat, "Hello @user", false);
             text.AddMentionedUser(user);
 
+            // Act & Assert - Duplicate mention not allowed
             Assert.Throws<InvalidOperationException>(() => text.AddMentionedUser(user));
         }
 
+        // TEST: Can't remove user that's not mentioned
         [Test]
         public void RemoveMentionedUser_NotPresent_ThrowsInvalidOperationException()
         {
@@ -84,9 +96,11 @@ namespace ABDULLAgram.Tests.Attachments
             
             var text = new Text(user, chat, "Hello @user", false);
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(() => text.RemoveMentionedUser(user));
         }
 
+        // TEST: Null validation
         [Test]
         public void AddMentionedUser_Null_ThrowsArgumentNullException()
         {
@@ -95,6 +109,7 @@ namespace ABDULLAgram.Tests.Attachments
 
             var text = new Text(user, chat, "Hello", false);
 
+            // Act & Assert
             Assert.Throws<ArgumentNullException>(() => text.AddMentionedUser(null));
         }
     }
