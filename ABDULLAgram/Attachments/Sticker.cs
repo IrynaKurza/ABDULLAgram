@@ -62,5 +62,9 @@ namespace ABDULLAgram.Attachments
         }
 
         private Sticker() { } // for XML serialization
+        protected override void RemoveFromExtent()
+        {
+            _extent.Remove(this);
+        }
     }
 }

@@ -56,5 +56,9 @@ namespace ABDULLAgram.Messages
         }
 
         private Draft() { } // for XML serialization
+        protected override void RemoveFromExtent()
+        {
+            _extent.Remove(this);
+        }
     }
 }

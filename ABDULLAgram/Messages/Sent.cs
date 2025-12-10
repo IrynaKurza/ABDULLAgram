@@ -107,5 +107,9 @@ namespace ABDULLAgram.Messages
         }
 
         private Sent() { } // for XML serialization
+        protected override void RemoveFromExtent()
+        {
+            _extent.Remove(this);
+        }
     }
 }

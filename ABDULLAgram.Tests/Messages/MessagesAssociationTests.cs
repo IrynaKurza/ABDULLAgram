@@ -14,6 +14,11 @@ namespace ABDULLAgram.Tests.Messages
         }
         private class TestMessage : ABDULLAgram.Messages.Message {
             public TestMessage(User u, Chat c) : base(u, c) { }
+            private static readonly List<TestMessage> _extent = new();
+            protected override void RemoveFromExtent()
+            {
+                _extent.Remove(this);
+            }
         }
 
         private User _user1;

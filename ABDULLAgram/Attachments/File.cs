@@ -72,5 +72,9 @@ namespace ABDULLAgram.Attachments
         }
 
         private File() { } // for XML serialization
+        protected override void RemoveFromExtent()
+        {
+            _extent.Remove(this);
+        }
     }
 }
