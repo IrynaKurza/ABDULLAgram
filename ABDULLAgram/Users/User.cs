@@ -289,19 +289,35 @@ namespace ABDULLAgram.Users
         
         // INTERNAL: Called by Message constructor
         // Message creates the association when it's created
-        internal void AddMessage(Message message)
+        public void AddMessage(Message message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+            
             if (!_messages.Contains(message))
             {
                 _messages.Add(message);
+                
+                // REVERSE CONNECTION
+                if (message.Sender != this)
+                {
+                    message.Sender = this;
+                }
             }
         }
         
-        internal void RemoveMessage(Message message)
+        public void RemoveMessage(Message message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+            
             if (_messages.Contains(message))
             {
                 _messages.Remove(message);
+                
+                // REVERSE CONNECTION
+                if (message.Sender == this)
+                {
+                    message.Sender = null;
+                }
             }
         }
     }
