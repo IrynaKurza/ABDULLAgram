@@ -14,17 +14,17 @@ namespace ABDULLAgram.Tests.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent(); // Clear users to prevent phone duplication errors between tests
+            Regular.ClearExtent();
             
-            // Create dummy dependencies for the tests
             _user = new Regular("sender", "+123456789", true, 1);
             _chat = new Group { Name = "Test Group" };
+            
+            _chat.AddMember(_user);
         }
 
         [Test]
         public void Constructor_AddsToExtent()
         {
-            // Updated constructor usage: passing User and Chat
             var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
 
             Assert.That(Sent.GetAll().Count, Is.EqualTo(1));
@@ -55,6 +55,8 @@ namespace ABDULLAgram.Tests.Messages
             Regular.ClearExtent();
             _user = new Regular("sender", "+987654321", true, 1);
             _chat = new Group { Name = "Validation Group" };
+            
+            _chat.AddMember(_user);
         }
 
         [Test]
@@ -161,7 +163,7 @@ namespace ABDULLAgram.Tests.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent(); // Ensure clean state for users as well
+            Regular.ClearExtent();
             Persistence.DeleteAll(TestPath);
         }
 
@@ -171,15 +173,16 @@ namespace ABDULLAgram.Tests.Messages
         [Test]
         public void SaveAndLoad_PreservesAllData()
         {
-            // Create dependencies
             var u1 = new Regular("user1", "+11111", true, 1);
             var u2 = new Regular("user2", "+22222", false, 2);
             var c1 = new Group { Name = "Group1" };
 
+            c1.AddMember(u1);
+            c1.AddMember(u2);
+
             var sendTime1 = DateTime.Now.AddMinutes(-20);
             var sendTime2 = DateTime.Now.AddMinutes(-15);
             
-            // Pass dependencies to constructors
             new Sent(u1, c1, sendTime1, sendTime1.AddMinutes(2), sendTime1.AddMinutes(5), null);
             new Sent(u2, c1, sendTime2, sendTime2.AddMinutes(1), null, sendTime2.AddMinutes(3));
 
@@ -187,7 +190,7 @@ namespace ABDULLAgram.Tests.Messages
             Assert.That(File.Exists(TestPath), Is.True);
 
             Sent.ClearExtent();
-            Regular.ClearExtent(); // Clear dependencies to simulate full reload
+            Regular.ClearExtent(); 
             
             var ok = Persistence.LoadAll(TestPath);
 
@@ -204,6 +207,8 @@ namespace ABDULLAgram.Tests.Messages
         {
             var u = new Regular("temp", "+999", true, 1);
             var c = new Group { Name = "G" };
+            c.AddMember(u);
+
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
 
             var ok = Persistence.LoadAll("__does_not_exist__.xml");
@@ -217,6 +222,8 @@ namespace ABDULLAgram.Tests.Messages
         {
             var u = new Regular("temp", "+999", true, 1);
             var c = new Group { Name = "G" };
+            c.AddMember(u);
+
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
 
             Assert.Throws<DirectoryNotFoundException>(() =>
