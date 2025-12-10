@@ -148,19 +148,35 @@ namespace ABDULLAgram.Chats
 
         // INTERNAL: Called by Message constructor
         // Message creates association when it's sent to a chat
-        internal void AddMessage(Message message)
+        public void AddMessage(Message message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
             if (!_history.Contains(message))
             {
                 _history.Add(message);
+                
+                // REVERSE CONNECTION
+                if (message.TargetChat != this)
+                {
+                    message.TargetChat = this;
+                }
             }
         }
 
-        internal void RemoveMessage(Message message)
+        public void RemoveMessage(Message message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
             if (_history.Contains(message))
             {
                 _history.Remove(message);
+                
+                // REVERSE CONNECTION
+                if (message.TargetChat == this)
+                {
+                    message.TargetChat = null;
+                }
             }
         }
     }

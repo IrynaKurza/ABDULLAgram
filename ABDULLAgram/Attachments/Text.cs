@@ -103,5 +103,9 @@ namespace ABDULLAgram.Attachments
         }
 
         private Text() { }
+        protected override void RemoveFromExtent()
+        {
+            _extent.Remove(this);
+        }
     }
 }
