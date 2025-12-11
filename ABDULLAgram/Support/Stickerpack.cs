@@ -32,35 +32,61 @@ namespace ABDULLAgram.Support
         
         private List<Sticker> _stickers = new();
 
+        // ==== PUBLIC API: Use these to add/remove stickers ====
+        
         public void AddSticker(Sticker sticker)
         {
+            if (sticker == null)
+                throw new ArgumentNullException(nameof(sticker));
+
             // Business rule: max 50 stickers per pack
             if (_stickers.Count >= 50)
                 throw new InvalidOperationException("Stickerpack cannot have more than 50 stickers.");
             
-            if (_stickers.Contains(sticker)) return;
+            // Already in this pack - do nothing
+            if (_stickers.Contains(sticker)) 
+                return;
             
-            // AGGREGATION FEATURE: Sticker can move between packs
-            // If sticker belongs to another pack, remove it first
-            sticker.BelongsToPack?.RemoveSticker(sticker);
-            
-            _stickers.Add(sticker);
-            sticker.BelongsToPack = this;  // Set reverse reference
+            // Set reverse reference - the setter handles everything:
+            // 1. Removes from old pack if any
+            // 2. Adds to this pack's _stickers list via AddStickerInternal
+            sticker.BelongsToPack = this;
         }
 
         public void RemoveSticker(Sticker sticker)
         {
-            if (!_stickers.Contains(sticker)) return;
+            if (sticker == null)
+                throw new ArgumentNullException(nameof(sticker));
+
+            // Not in this pack - do nothing
+            if (!_stickers.Contains(sticker)) 
+                return;
             
             // Business rule: pack must have at least 1 sticker
             if (_stickers.Count <= 1)
                 throw new InvalidOperationException("Stickerpack must have at least 1 sticker.");
             
-            _stickers.Remove(sticker);
-            sticker.BelongsToPack = null;  // Clear reverse reference
+            // Clear reverse reference - the setter handles removing from _stickers
+            sticker.BelongsToPack = null;
         }
 
         public IReadOnlyCollection<Sticker> GetStickers() => _stickers.AsReadOnly();
+
+        // ==== INTERNAL METHODS: Called by Sticker.BelongsToPack setter ====
+        // These handle the actual list modifications
+        // No validation here - that's done in public methods
+        // No reverse connection calls - would cause infinite loop!
+        
+        internal void AddStickerInternal(Sticker sticker)
+        {
+            if (!_stickers.Contains(sticker))
+                _stickers.Add(sticker);
+        }
+
+        internal void RemoveStickerInternal(Sticker sticker)
+        {
+            _stickers.Remove(sticker);
+        }
 
         // ============================================================
         // BASIC ASSOCIATION: Stickerpack ↔ User (many-to-many)
