@@ -2,6 +2,7 @@
 using ABDULLAgram.Users;
 using ABDULLAgram.Chats;
 using ABDULLAgram.Attachments;
+using ABDULLAgram.Support;
 
 namespace ABDULLAgram.Tests.Messages
 {
@@ -15,15 +16,23 @@ namespace ABDULLAgram.Tests.Messages
             public TestChat() { Name = "Test Group"; } 
         }
 
+        // Counter to ensure unique emoji codes across tests
+        private int _emojiCounter = 0;
+
+        // Helper: Create a sticker with unique emojiCode
         private Sticker CreateOrphanMessage()
         {
-            return new Sticker(Sticker.BackgroundTypeEnum.Transparent);
+            var emoji = "🎨" + _emojiCounter;
+            _emojiCounter++;
+            return new Sticker(emoji, Sticker.BackgroundTypeEnum.Transparent);
         }
 
         [SetUp]
         public void Setup()
         {
             Regular.ClearExtent();
+            Sticker.ClearExtent();
+            _emojiCounter = 0;
         }
 
         [Test]

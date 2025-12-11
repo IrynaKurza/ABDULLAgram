@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ABDULLAgram.Attachments;
 using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Support
 {
+    [Serializable]
     public class Stickerpack
     {
         // ============================================================
@@ -24,43 +28,69 @@ namespace ABDULLAgram.Support
         public bool IsPremium { get; set; }
 
         // ============================================================
-        // AGGREGATION: Stickerpack ↔ Sticker (1 pack → 1..50 stickers)
-        // Aggregation vs Composition: Stickers CAN exist independently
+        // QUALIFIED AGGREGATION: Stickerpack ↔ Sticker (1 pack → 1..50 stickers)
+        // Dictionary with emojiCode as QUALIFIER (key)
+        // Stickers can move between packs (aggregation)
         // Pack has min 1, max 50 stickers
-        // If pack is deleted, stickers are NOT automatically deleted
         // ============================================================
         
-        private List<Sticker> _stickers = new();
+        private Dictionary<string, Sticker> _stickers = new Dictionary<string, Sticker>();
 
+        // Add sticker to pack (moves between packs like before)
         public void AddSticker(Sticker sticker)
         {
+            if (sticker == null)
+                throw new ArgumentNullException(nameof(sticker));
+
             // Business rule: max 50 stickers per pack
             if (_stickers.Count >= 50)
                 throw new InvalidOperationException("Stickerpack cannot have more than 50 stickers.");
             
-            if (_stickers.Contains(sticker)) return;
+            // If already in this pack, do nothing
+            if (_stickers.ContainsKey(sticker.EmojiCode))
+                return;
             
             // AGGREGATION FEATURE: Sticker can move between packs
             // If sticker belongs to another pack, remove it first
-            sticker.BelongsToPack?.RemoveSticker(sticker);
+            if (sticker.BelongsToPack != null)
+            {
+                sticker.BelongsToPack.RemoveSticker(sticker.EmojiCode);
+            }
             
-            _stickers.Add(sticker);
-            sticker.BelongsToPack = this;  // Set reverse reference
+            // Add to dictionary with emojiCode as key
+            _stickers.Add(sticker.EmojiCode, sticker);
+            sticker.BelongsToPack = this;
         }
 
-        public void RemoveSticker(Sticker sticker)
+        // Remove sticker by emojiCode (qualified)
+        public void RemoveSticker(string emojiCode)
         {
-            if (!_stickers.Contains(sticker)) return;
+            if (string.IsNullOrWhiteSpace(emojiCode))
+                return;
+
+            if (!_stickers.ContainsKey(emojiCode))
+                return;
             
             // Business rule: pack must have at least 1 sticker
             if (_stickers.Count <= 1)
                 throw new InvalidOperationException("Stickerpack must have at least 1 sticker.");
             
-            _stickers.Remove(sticker);
-            sticker.BelongsToPack = null;  // Clear reverse reference
+            var sticker = _stickers[emojiCode];
+            _stickers.Remove(emojiCode);
+            sticker.RemoveFromPack();
         }
 
-        public IReadOnlyCollection<Sticker> GetStickers() => _stickers.AsReadOnly();
+        // QUALIFIED LOOKUP: O(1) lookup by emojiCode
+        public Sticker? GetStickerByEmojiCode(string emojiCode)
+        {
+            if (string.IsNullOrWhiteSpace(emojiCode))
+                return null;
+
+            return _stickers.ContainsKey(emojiCode) ? _stickers[emojiCode] : null;
+        }
+
+        // Get all stickers as collection
+        public IReadOnlyCollection<Sticker> GetStickers() => _stickers.Values.ToList().AsReadOnly();
 
         // ============================================================
         // BASIC ASSOCIATION: Stickerpack ↔ User (many-to-many)
@@ -72,7 +102,6 @@ namespace ABDULLAgram.Support
         public IReadOnlyCollection<User> SavedByUsers => _savedByUsers.ToList().AsReadOnly();
 
         // PUBLIC METHOD: Use this to add a user from Stickerpack side
-        // Validates, updates pack's collection, creates reverse connection
         public void AddSavedByUser(User user)
         {
             if (user == null)
@@ -84,8 +113,6 @@ namespace ABDULLAgram.Support
             _savedByUsers.Add(user);
             
             // REVERSE CONNECTION: Tell user about this pack
-            // Use Internal to avoid infinite recursion
-            // NOTE: No max limit check here - that's User's responsibility!
             user.AddStickerpackInternal(this);
         }
 
@@ -104,9 +131,6 @@ namespace ABDULLAgram.Support
         }
 
         // INTERNAL METHOD: Called by User.SaveStickerpack()
-        // No validation - already done in User.SaveStickerpack()
-        // No reverse connection - would cause infinite loop!
-        // NOTE: User's max limit is checked in User.SaveStickerpack(), not here
         internal void AddSavedByUserInternal(User user)
         {
             _savedByUsers.Add(user);

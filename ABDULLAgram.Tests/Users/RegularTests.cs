@@ -19,25 +19,14 @@ namespace ABDULLAgram.Tests.Users
         }
 
         [Test]
-        public void StaticProperty_AppliesToAll()
+        public void MaxSavedStickerpacks_IsCorrect()
         {
-            Regular.MaxStickerPacksSaved = 15;
+            var r1 = new Regular("bob",  "+111", false, 2);
+            var r2 = new Regular("dina", "+222", true,  5);
 
-            var _r1 = new Regular("bob",  "+111", false, 2);
-            var _r2 = new Regular("dina", "+222", true,  5);
-
-            Assert.That(Regular.MaxStickerPacksSaved, Is.EqualTo(15));
-            Assert.That(Regular.GetAll().All(_ => Regular.MaxStickerPacksSaved == 15));
-        }
-
-        [Test]
-        public void Status_Derived_IsCorrect()
-        {
-            var r = new Regular("test", "+333", true, 1);
-            Assert.That(r.Status, Is.EqualTo("Online"));
-
-            r.IsOnline = false;
-            Assert.That(r.Status, Is.EqualTo("Offline"));
+            // Regular users have max 10 stickerpacks (polymorphism)
+            Assert.That(r1.MaxSavedStickerpacks, Is.EqualTo(10));
+            Assert.That(r2.MaxSavedStickerpacks, Is.EqualTo(10));
         }
 
         [Test]
@@ -163,13 +152,6 @@ namespace ABDULLAgram.Tests.Users
             var r = new Regular("alice", "+111", true, 1);
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 r.AdFrequency = -1);
-        }
-
-        [Test]
-        public void Set_MaxStickerPacksSaved_Negative_Throws()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-                Regular.MaxStickerPacksSaved = -5);
         }
         
         [Test]

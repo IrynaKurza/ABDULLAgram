@@ -221,12 +221,15 @@ namespace ABDULLAgram.Users
         public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
 
         // INTERNAL: Called by Folder constructor
+        // Establishes reverse connection when folder is created
         internal void AddFolderInternal(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
             _folders.Add(folder);
         }
 
+        // INTERNAL: Called by Folder.Delete()
+        // Just removes from collection - extent removal handled in Folder
         internal void RemoveFolderInternal(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
@@ -240,23 +243,50 @@ namespace ABDULLAgram.Users
             return new Folder(this, name);
         }
 
+        // Delete single folder - calls folder's Delete method
+        // Folder.Delete() removes from extent AND from user's collection
         public void DeleteFolder(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
             if (!_folders.Contains(folder))
                 throw new InvalidOperationException("Folder does not belong to this user.");
 
-            _folders.Remove(folder);
+            // Folder.Delete() will call RemoveFolderInternal and remove from extent
+            folder.Delete();
         }
 
-        // Composition cleanup: When user is deleted, all folders should be deleted too
+        // COMPOSITION: When user is deleted, all folders must be deleted
+        // Each folder is removed from extent (true deletion)
         public void DeleteAllFolders()
         {
+            // ToList() creates copy to avoid collection modification during iteration
             foreach (var folder in _folders.ToList())
             {
-                _folders.Remove(folder);
+                folder.Delete(); // Removes from extent AND user's collection
             }
         }
+
+        // DELETE USER: Removes user from extent and deletes all owned folders
+        // This is the proper way to delete a user (composition cleanup)
+        public void DeleteUser()
+        {
+            // First, delete all owned folders (composition rule)
+            DeleteAllFolders();
+            
+            // Then remove user from their extent
+            if (this is Regular)
+            {
+                Regular.RemoveFromExtent((Regular)this);
+            }
+            else if (this is Premium)
+            {
+                Premium.RemoveFromExtent((Premium)this);
+            }
+            
+            // Note: Could also clean up other associations here if needed
+            // For now, just handle composition deletion
+        }
+        
 
         // ============================================================
         // BASIC ASSOCIATION: User ↔ Text (many-to-many)

@@ -3,22 +3,10 @@ namespace ABDULLAgram.Users
     [Serializable]
     public class Regular : User
     {
-        // User attributes override
-        public sealed override string PhoneNumber
-        {
-            get => base.PhoneNumber;
-            set
-            {
-                // First call base to validate "not empty"
-                // Then check uniqueness in this extent
-                bool exists = Extent.Any(r => !ReferenceEquals(r, this) && r.PhoneNumber == value);
-                if (exists)
-                    throw new InvalidOperationException("PhoneNumber must be unique among Regular users.");
-                
-                base.PhoneNumber = value;
-            }
-        }
-
+        // ============================================================
+        // REGULAR-SPECIFIC ATTRIBUTES
+        // ============================================================
+        
         private int _adFrequency;
         public int AdFrequency
         {
@@ -31,49 +19,53 @@ namespace ABDULLAgram.Users
             }
         }
 
-        // Regular attributes
-        private static int _maxStickerPacksSaved = 10;
-        public static int MaxStickerPacksSaved
-        {
-            get => _maxStickerPacksSaved;
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(MaxStickerPacksSaved), "MaxStickerPacksSaved cannot be negative.");
-                _maxStickerPacksSaved = value;
-            }
-        }
+        // POLYMORPHISM: Regular users limited to 10 stickerpacks
+        public override int MaxSavedStickerpacks => 10;
 
-        // Override abstract property from User - Regular users limited to 10 packs
-        public override int MaxSavedStickerpacks => MaxStickerPacksSaved;
-
-        // Derived attribute
-        public string Status => IsOnline ? "Online" : "Offline";
+        // ============================================================
+        // CLASS EXTENT PATTERN
+        // ============================================================
         
-        // Class Extent
-        private static readonly List<Regular> Extent = new();
-        public static IReadOnlyCollection<Regular> GetAll() => Extent.AsReadOnly();
-
-        private void AddToExtent() => Extent.Add(this);
-        public static void ClearExtent() => Extent.Clear();
+        private static readonly List<Regular> _extent = new();
+        public static IReadOnlyCollection<Regular> GetAll() => _extent.AsReadOnly();
+        private void AddToExtent()
+        {
+            // Check for duplicate phone numbers
+            if (_extent.Any(u => u.PhoneNumber == this.PhoneNumber))
+                throw new InvalidOperationException($"A user with phone number '{this.PhoneNumber}' already exists.");
+                
+            _extent.Add(this);
+        }
+        public static void ClearExtent() => _extent.Clear();
+        
         public static void ReAdd(Regular r)
         {
-            if (Extent.Any(x => x.PhoneNumber == r.PhoneNumber && !ReferenceEquals(x, r)))
-                throw new InvalidOperationException("Duplicate PhoneNumber found during Load.");
-            Extent.Add(r);
+            if (_extent.Any(x => x.PhoneNumber == r.PhoneNumber && !ReferenceEquals(x, r)))
+                throw new InvalidOperationException("Duplicate PhoneNumber found during load of Regular users.");
+            _extent.Add(r);
         }
 
-        // Constructors
+        // Called by User.DeleteUser() for composition cleanup
+        internal static void RemoveFromExtent(Regular user)
+        {
+            _extent.Remove(user);
+        }
+
+        // ============================================================
+        // CONSTRUCTORS
+        // ============================================================
+        
         public Regular(string username, string phoneNumber, bool isOnline, int adFrequency)
         {
             Username = username;
             PhoneNumber = phoneNumber;
             IsOnline = isOnline;
-            AdFrequency = adFrequency;
-
-            AddToExtent();
+            AdFrequency = adFrequency; // Uses property setter for validation
+            
+            AddToExtent(); // Will check for duplicates
         }
 
-        private Regular() {} // For XML serialization
+        // Parameterless constructor for XML serialization
+        private Regular() { }
     }
 }
