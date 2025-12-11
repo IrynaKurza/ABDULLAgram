@@ -12,9 +12,31 @@ namespace ABDULLAgram.Attachments
         // Sticker-specific attributes
         public BackgroundTypeEnum BackgroundType { get; set; }
 
-        // Aggregation reverse link
+        // ============================================================
+        // AGGREGATION: Sticker ↔ Stickerpack (reverse connection)
+        // Setter handles both directions to ensure consistency
+        // ============================================================
+        
+        private Stickerpack? _belongsToPack;
+        
         [System.Xml.Serialization.XmlIgnore]
-        public Stickerpack? BelongsToPack { get; internal set; }
+        public Stickerpack? BelongsToPack
+        {
+            get => _belongsToPack;
+            internal set
+            {
+                if (_belongsToPack == value)
+                    return;
+
+                // Remove from old pack (reverse connection)
+                _belongsToPack?.RemoveStickerInternal(this);
+                
+                _belongsToPack = value;
+                
+                // Add to new pack (reverse connection)
+                _belongsToPack?.AddStickerInternal(this);
+            }
+        }
 
         // Override Id to add uniqueness check (like Regular does with PhoneNumber)
         public override string Id
