@@ -7,7 +7,7 @@ namespace ABDULLAgram.Support
     {
         // ============================================================
         // COMPOSITION: User owns Folder (1 user → 0..* folders)
-        // Strong ownership: Folder CANNOT exist without a User
+        // Folder CANNOT exist without a User
         // When Folder is deleted, it's removed from EXTENT (truly deleted)
         // When User is deleted, all their folders are deleted
         // ============================================================
@@ -19,10 +19,10 @@ namespace ABDULLAgram.Support
         // Maintains collection of all Folder instances in memory
         // ============================================================
         
-        private static readonly List<Folder> _extent = new();
-        public static IReadOnlyCollection<Folder> GetAll() => _extent.AsReadOnly();
-        private void AddToExtent() => _extent.Add(this);
-        public static void ClearExtent() => _extent.Clear();
+        private static readonly List<Folder> Extent = new();
+        public static IReadOnlyCollection<Folder> GetAll() => Extent.AsReadOnly();
+        private void AddToExtent() => Extent.Add(this);
+        public static void ClearExtent() => Extent.Clear();
         
         // Parameterless constructor for XML serialization
         private Folder() { }
@@ -34,12 +34,9 @@ namespace ABDULLAgram.Support
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
             Name = name;  // Uses property setter for validation
-            
-            // Add to extent (folder now exists in system)
             AddToExtent();
             
             // REVERSE CONNECTION: Register this folder with the owner immediately
-            // This establishes the bidirectional link
             _owner.AddFolderInternal(this);  
         }
 
@@ -62,16 +59,15 @@ namespace ABDULLAgram.Support
         // ============================================================
         // DELETE METHOD
         // COMPOSITION: When folder is deleted, remove from EXTENT
-        // Also remove from owner's collection (bidirectional cleanup)
+        // Also remove from owner's collection
         // ============================================================
         
         public void Delete()
         {
-            // Remove from extent (TRUE deletion - folder no longer exists)
-            _extent.Remove(this);
+            // Remove from extent 
+            Extent.Remove(this);
             
             // REVERSE CONNECTION: Remove from owner's collection
-            // This maintains bidirectional consistency
             if (_owner != null)
             {
                 _owner.RemoveFolderInternal(this);

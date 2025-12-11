@@ -81,7 +81,6 @@ namespace ABDULLAgram.Attachments
         // CONSTRUCTORS
         // ============================================================
         
-        // Simple constructor - just emojiCode and background type
         public Sticker(string emojiCode, BackgroundTypeEnum backgroundType)
         {
             if (string.IsNullOrWhiteSpace(emojiCode))

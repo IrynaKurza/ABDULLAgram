@@ -79,16 +79,15 @@ namespace ABDULLAgram.Users
             
             // Add to both directions (reflex association = same class on both sides)
             _blockedUsers.Add(user);
-            user._blockedBy.Add(this);  // Direct access because same class
+            user._blockedBy.Add(this); 
         }
 
         public void UnblockUser(User user)
         {
             if (!_blockedUsers.Contains(user)) return;
             
-            // Remove from both directions
             _blockedUsers.Remove(user);
-            user._blockedBy.Remove(this);  // Direct access because same class
+            user._blockedBy.Remove(this); 
         }
 
         public IReadOnlyCollection<User> GetBlockedUsers() => _blockedUsers.AsReadOnly();
@@ -100,8 +99,6 @@ namespace ABDULLAgram.Users
         // ============================================================
         
         private HashSet<Chat> _joinedChats = new HashSet<Chat>();
-        
-        // ReadOnly prevents external code from modifying the collection directly
         public IReadOnlyCollection<Chat> JoinedChats => _joinedChats.ToList().AsReadOnly();
 
         // PUBLIC METHOD: Use this to join a chat from User side
@@ -153,17 +150,13 @@ namespace ABDULLAgram.Users
 
         // ============================================================
         // BASIC ASSOCIATION: User ↔ Stickerpack (many-to-many)
-        // Regular users: max 10 packs, Premium users: unlimited
         // ============================================================
         
         private HashSet<Stickerpack> _savedStickerpacks = new();
         public IReadOnlyCollection<Stickerpack> SavedStickerpacks => _savedStickerpacks.ToList().AsReadOnly();
-
-        // Abstract property - each subclass (Regular/Premium) defines their own limit
         public abstract int MaxSavedStickerpacks { get; }
 
         // PUBLIC METHOD: Use this to save a stickerpack
-        // Virtual allows subclasses to override if needed
         public virtual void SaveStickerpack(Stickerpack pack)
         {
             if (pack == null)
@@ -171,8 +164,7 @@ namespace ABDULLAgram.Users
 
             if (_savedStickerpacks.Contains(pack))
                 throw new InvalidOperationException("This stickerpack is already saved.");
-
-            // Business rule enforcement: check max limit
+            
             // Regular = 10, Premium = unlimited (int.MaxValue)
             if (_savedStickerpacks.Count >= MaxSavedStickerpacks)
                 throw new InvalidOperationException($"Cannot save more than {MaxSavedStickerpacks} stickerpacks.");
@@ -214,7 +206,7 @@ namespace ABDULLAgram.Users
         // ============================================================
         // COMPOSITION: User owns Folders (1 user → 0..* folders)
         // Folders are destroyed when User is destroyed
-        // Strong ownership: Folder cannot exist without User
+        // Folder cannot exist without User
         // ============================================================
         
         private readonly HashSet<Folder> _folders = new();

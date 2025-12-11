@@ -50,7 +50,7 @@ namespace ABDULLAgram.Support
             if (_stickers.ContainsKey(sticker.EmojiCode))
                 return;
             
-            // AGGREGATION FEATURE: Sticker can move between packs
+            // Sticker can move between packs
             // If sticker belongs to another pack, remove it first
             if (sticker.BelongsToPack != null)
             {
@@ -71,7 +71,7 @@ namespace ABDULLAgram.Support
             if (!_stickers.ContainsKey(emojiCode))
                 return;
             
-            // Business rule: pack must have at least 1 sticker
+            // pack must have at least 1 sticker
             if (_stickers.Count <= 1)
                 throw new InvalidOperationException("Stickerpack must have at least 1 sticker.");
             
@@ -80,7 +80,7 @@ namespace ABDULLAgram.Support
             sticker.RemoveFromPack();
         }
 
-        // QUALIFIED LOOKUP: O(1) lookup by emojiCode
+        // QUALIFIED LOOKUP: lookup by emojiCode
         public Sticker? GetStickerByEmojiCode(string emojiCode)
         {
             if (string.IsNullOrWhiteSpace(emojiCode))

@@ -92,8 +92,8 @@ namespace ABDULLAgram.Chats
             user.RemoveChatInternal(this);
         }
 
-        // QUALIFIED LOOKUP: This is the key feature of qualified associations!
-        // O(1) lookup by phone number instead of O(n) loop through all users
+        // QUALIFIED LOOKUP
+        // lookup by phone number instead of loop through all users
         public User? GetMemberByPhoneNumber(string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -101,8 +101,7 @@ namespace ABDULLAgram.Chats
 
             return _members.ContainsKey(phoneNumber) ? _members[phoneNumber] : null;
         }
-
-        // SPECIAL METHOD for qualified associations:
+        
         // When user changes phone number, we must update the Dictionary key!
         // Called by User.PhoneNumber setter
         public void UpdateMemberPhoneNumber(string oldPhoneNumber, string newPhoneNumber)
