@@ -274,9 +274,6 @@ namespace ABDULLAgram.Users
             {
                 Premium.RemoveFromExtent((Premium)this);
             }
-            
-            // Note: Could also clean up other associations here if needed
-            // For now, just handle composition deletion
         }
         
 

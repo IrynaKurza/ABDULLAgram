@@ -106,7 +106,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
         }
 
         // TEST: QUALIFIED LOOKUP - Key feature of qualified associations!
-        // O(1) lookup by phone number instead of iterating through collection
+        // lookup by phone number instead of iterating through collection
         [Test]
         public void GetMemberByPhoneNumber_ExistingUser_ReturnsUser()
         {
