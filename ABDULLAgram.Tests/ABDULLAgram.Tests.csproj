@@ -25,4 +25,9 @@
       <ProjectReference Include="..\ABDULLAgram\ABDULLAgram.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="OLD.TESTS\" />
+      <Folder Include="TestInfrastructure\" />
+    </ItemGroup>
+
 </Project>
