@@ -306,38 +306,49 @@ namespace ABDULLAgram.Users
         private readonly List<Message> _messages = new();
         public IReadOnlyList<Message> SentMessages => _messages.AsReadOnly();
         
+        internal void AddMessageInternal(Message message)
+        {
+            _messages.Add(message);
+        }
+
+        internal void RemoveMessageInternal(Message message)
+        {
+            _messages.Remove(message);
+        }
+        
         // INTERNAL: Called by Message constructor
         // Message creates the association when it's created
-        public void AddMessage(Message message)
+        internal void AddMessage(Message message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-            
-            if (!_messages.Contains(message))
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (_messages.Contains(message))
+                return;
+
+            _messages.Add(message);
+
+            if (message.Sender != this)
             {
-                _messages.Add(message);
-                
-                // REVERSE CONNECTION
-                if (message.Sender != this)
-                {
-                    message.Sender = this;
-                }
+                message.SetSenderInternal(this); 
             }
         }
         
         public void RemoveMessage(Message message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-            
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             if (_messages.Contains(message))
             {
                 _messages.Remove(message);
-                
-                // REVERSE CONNECTION
+
                 if (message.Sender == this)
                 {
-                    message.Sender = null;
+                    message.ClearSenderInternal(); 
                 }
             }
         }
+
     }
 }

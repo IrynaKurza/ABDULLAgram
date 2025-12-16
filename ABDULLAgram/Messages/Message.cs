@@ -13,35 +13,64 @@ namespace ABDULLAgram.Messages
         public long MessageSize => _messageSize;
         protected void SetSize(long bytes) { if (bytes < 0) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot be negative."); if (bytes > MaximumSize) throw new ArgumentOutOfRangeException(nameof(bytes), "Message size cannot exceed 10GB."); _messageSize = bytes; }
 
-        private User _sender;
+        private User? _sender;
+        private Chat? _targetChat;
+        
+        internal void SetSenderInternal(User user)
+        {
+            _sender = user;
+        }
+        
+        internal void ClearSenderInternal()
+        {
+            _sender = null;
+        }
+
         public User Sender
         {
-            get => _sender;
+            get => _sender ?? throw new InvalidOperationException("Message has no sender.");
             set
             {
-                if (_sender != value)
-                {
-                    if (_sender != null) _sender.RemoveMessage(this);
-                    _sender = value;
-                    if (_sender != null) _sender.AddMessage(this);
-                }
+                if (value == null)
+                    throw new ArgumentNullException(nameof(Sender));
+
+                if (_sender == value)
+                    return;
+
+                _sender?.RemoveMessageInternal(this);
+                _sender = value;
+                _sender.AddMessageInternal(this);
             }
         }
 
-        private Chat _targetChat;
+        
+        internal void SetTargetChatInternal(Chat chat)
+        {
+            _targetChat = chat;
+        }
+
+        internal void ClearTargetChatInternal()
+        {
+            _targetChat = null;
+        }
+        
         public Chat TargetChat
         {
-            get => _targetChat;
+            get => _targetChat ?? throw new InvalidOperationException("Message has no target chat.");
             set
             {
-                if (_targetChat != value)
-                {
-                    if (_targetChat != null) _targetChat.RemoveMessage(this);
-                    _targetChat = value;
-                    if (_targetChat != null) _targetChat.AddMessage(this);
-                }
+                if (value == null)
+                    throw new ArgumentNullException(nameof(TargetChat));
+
+                if (_targetChat == value)
+                    return;
+
+                _targetChat?.RemoveMessageInternal(this);
+                _targetChat = value;
+                _targetChat.AddMessageInternal(this);
             }
         }
+
 
         protected Message(User sender, Chat chat)
         {
@@ -63,19 +92,14 @@ namespace ABDULLAgram.Messages
 
         public virtual void Delete()
         {
-            if (_sender != null)
-            {
-                _sender.RemoveMessage(this);
-                _sender = null;
-            }
+            _sender?.RemoveMessageInternal(this);
+            _targetChat?.RemoveMessageInternal(this);
 
-            if (_targetChat != null)
-            {
-                _targetChat.RemoveMessage(this);
-                _targetChat = null;
-            }
+            _sender = null;
+            _targetChat = null;
 
             RemoveFromExtent();
         }
+
     }
 }

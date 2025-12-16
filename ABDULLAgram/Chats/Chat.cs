@@ -144,6 +144,16 @@ namespace ABDULLAgram.Chats
         
         private readonly List<Message> _history = new();
         public IReadOnlyList<Message> History => _history.AsReadOnly();
+        
+        internal void AddMessageInternal(Message message)
+        {
+            _history.Add(message);
+        }
+
+        internal void RemoveMessageInternal(Message message)
+        {
+            _history.Remove(message);
+        }
 
         // INTERNAL: Called by Message constructor
         // Message creates association when it's sent to a chat
@@ -158,7 +168,7 @@ namespace ABDULLAgram.Chats
                 // REVERSE CONNECTION
                 if (message.TargetChat != this)
                 {
-                    message.TargetChat = this;
+                    message.SetTargetChatInternal(this);
                 }
             }
         }
@@ -174,7 +184,7 @@ namespace ABDULLAgram.Chats
                 // REVERSE CONNECTION
                 if (message.TargetChat == this)
                 {
-                    message.TargetChat = null;
+                    message.ClearTargetChatInternal();
                 }
             }
         }
