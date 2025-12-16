@@ -318,7 +318,7 @@ namespace ABDULLAgram.Users
         
         // INTERNAL: Called by Message constructor
         // Message creates the association when it's created
-        internal void AddMessage(Message message)
+        public void AddMessage(Message message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -348,6 +348,59 @@ namespace ABDULLAgram.Users
                     message.ClearSenderInternal(); 
                 }
             }
+        }
+        
+        // ============================================================
+        // BASIC ASSOCIATION (reverse): User — admin of — Group
+        // ============================================================
+
+        private readonly HashSet<Group> _adminOfGroups = new();
+        public IReadOnlyCollection<Group> AdminOfGroups => _adminOfGroups.ToList().AsReadOnly();
+
+        internal void AddAdminOfGroupInternal(Group group)
+        {
+            _adminOfGroups.Add(group);
+        }
+
+        internal void RemoveAdminOfGroupInternal(Group group)
+        {
+            _adminOfGroups.Remove(group);
+        }
+
+        // ============================================================
+        // BASIC ASSOCIATION (reverse): User — manages — Stickerpack
+        // ============================================================
+
+        private readonly HashSet<Stickerpack> _managedStickerpacks = new();
+        public IReadOnlyCollection<Stickerpack> ManagedStickerpacks =>
+            _managedStickerpacks.ToList().AsReadOnly();
+        
+        internal void AddManagedStickerpackInternal(Stickerpack pack)
+        {
+            _managedStickerpacks.Add(pack);
+        }
+
+        internal void RemoveManagedStickerpackInternal(Stickerpack pack)
+        {
+            _managedStickerpacks.Remove(pack);
+        }
+        
+        // ============================================================
+        // BASIC ASSOCIATION (reverse): User — read — Sent
+        // ============================================================
+
+        private readonly HashSet<Sent> _readMessages = new();
+        public IReadOnlyCollection<Sent> ReadMessages =>
+            _readMessages.ToList().AsReadOnly();
+
+        internal void AddReadMessageInternal(Sent message)
+        {
+            _readMessages.Add(message);
+        }
+
+        internal void RemoveReadMessageInternal(Sent message)
+        {
+            _readMessages.Remove(message);
         }
 
     }

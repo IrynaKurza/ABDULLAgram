@@ -1,6 +1,7 @@
 using ABDULLAgram.Users;
 using System.Xml.Serialization;
 using ABDULLAgram.Messages;
+using ABDULLAgram.Support;
 
 namespace ABDULLAgram.Chats
 {
@@ -188,5 +189,23 @@ namespace ABDULLAgram.Chats
                 }
             }
         }
+        
+        // ============================================================
+        // AGGREGATION: Chat ↔ Folder (reverse side)
+        // ============================================================
+
+        private readonly HashSet<Folder> _folders = new();
+        public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
+
+        internal void AddToFolderInternal(Folder folder)
+        {
+            _folders.Add(folder);
+        }
+
+        internal void RemoveFromFolderInternal(Folder folder)
+        {
+            _folders.Remove(folder);
+        }
+
     }
 }

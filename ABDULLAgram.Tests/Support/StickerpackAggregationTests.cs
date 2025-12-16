@@ -1,5 +1,6 @@
 using ABDULLAgram.Attachments;
 using ABDULLAgram.Support;
+using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Tests.Support
 {
@@ -8,12 +9,22 @@ namespace ABDULLAgram.Tests.Support
     {
         [SetUp]
         public void Setup() => Sticker.ClearExtent();
+        
+        private class TestUser : Regular
+        {
+            public TestUser(string name)
+                : base(name, "+" + name.GetHashCode(), true, 1)
+            {
+            }
+        }
+
 
         // TEST: Add stickers to pack
         [Test]
         public void AddSticker_AddsToPackWithEmojiCode()
         {
-            var pack = new Stickerpack { Name = "PackA", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("PackA", owner) { IsPremium = false };
             var sticker = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             
             pack.AddSticker(sticker);
@@ -28,8 +39,10 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void AddSticker_MovesStickerBetweenPacks()
         {
-            var packA = new Stickerpack { Name = "PackA" };
-            var packB = new Stickerpack { Name = "PackB" };
+            var ownerA = new TestUser("Owner");
+            var packA = new Stickerpack("PackA", ownerA) { IsPremium = false };
+            var ownerB = new TestUser("Owner");
+            var packB = new Stickerpack("PackB", ownerB) { IsPremium = false };
             var s1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var s2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);
 
@@ -46,7 +59,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void AddSticker_Over50_ThrowsException()
         {
-            var pack = new Stickerpack { Name = "BigPack", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("BigPack", owner) { IsPremium = false };
             
             for (int i = 0; i < 50; i++)
                 pack.AddSticker(new Sticker($"emoji_{i}", Sticker.BackgroundTypeEnum.Transparent));
@@ -59,7 +73,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void RemoveSticker_LastOne_ThrowsException()
         {
-            var pack = new Stickerpack { Name = "SinglePack", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("SinglePack", owner) { IsPremium = false };
             var sticker = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             pack.AddSticker(sticker);
 
@@ -71,7 +86,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void GetStickerByEmojiCode_ReturnsCorrectSticker()
         {
-            var pack = new Stickerpack { Name = "Emojis", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("Emojis", owner) { IsPremium = false };
             var sticker1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var sticker2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);
             pack.AddSticker(sticker1);
@@ -88,7 +104,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void AddSticker_DuplicateEmojiCode_DoesNotAddTwice()
         {
-            var pack = new Stickerpack { Name = "Emojis", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("Emojis", owner) { IsPremium = false };
             var sticker1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var sticker2 = new Sticker("😀", Sticker.BackgroundTypeEnum.Filled);  // Same emoji
             
@@ -103,7 +120,8 @@ namespace ABDULLAgram.Tests.Support
         [Test]
         public void RemoveSticker_RemovesFromPackAndClearsReference()
         {
-            var pack = new Stickerpack { Name = "Pack", IsPremium = false };
+            var owner = new TestUser("Owner");
+            var pack = new Stickerpack("Pack", owner) { IsPremium = false };
             var sticker1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var sticker2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);
             pack.AddSticker(sticker1);

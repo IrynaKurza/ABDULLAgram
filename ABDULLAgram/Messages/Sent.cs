@@ -111,5 +111,27 @@ namespace ABDULLAgram.Messages
         {
             _extent.Remove(this);
         }
+        
+        // ============================================================
+        // BASIC ASSOCIATION: Sent (0..*) — read by — User (0..*)
+        // ============================================================
+
+        private readonly HashSet<User> _readByUsers = new();
+        public IReadOnlyCollection<User> ReadByUsers => _readByUsers.ToList().AsReadOnly();
+        
+        public void MarkAsRead(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (_readByUsers.Contains(user))
+                return;
+
+            _readByUsers.Add(user);
+
+            // REVERSE CONNECTION (internal)
+            user.AddReadMessageInternal(this);
+        }
+
     }
 }

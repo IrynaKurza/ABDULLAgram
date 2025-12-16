@@ -26,9 +26,9 @@ namespace ABDULLAgram.Messages
             _sender = null;
         }
 
-        public User Sender
+        public User? Sender
         {
-            get => _sender ?? throw new InvalidOperationException("Message has no sender.");
+            get => _sender;
             set
             {
                 if (value == null)
@@ -54,9 +54,9 @@ namespace ABDULLAgram.Messages
             _targetChat = null;
         }
         
-        public Chat TargetChat
+        public Chat? TargetChat
         {
-            get => _targetChat ?? throw new InvalidOperationException("Message has no target chat.");
+            get => _targetChat;
             set
             {
                 if (value == null)

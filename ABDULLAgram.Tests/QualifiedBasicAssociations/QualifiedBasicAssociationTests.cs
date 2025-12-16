@@ -198,8 +198,9 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             Premium.ClearExtent();
             _regularUser = new Regular("Alice", "+48111222333", true, 5);
             _premiumUser = new Premium("Bob", "+48222333444", true, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(30));
-            _pack1 = new Stickerpack { Name = "Funny Pack", IsPremium = false };
-            _pack2 = new Stickerpack { Name = "Premium Pack", IsPremium = true };
+            _pack1 = new Stickerpack("Funny Pack", _regularUser) { IsPremium = false };
+            _pack2 = new Stickerpack("Premium Pack", _premiumUser) { IsPremium = true };
+
         }
 
         // TEST: Saving from User side creates bidirectional link
@@ -221,12 +222,13 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Arrange - Fill to limit (10 packs)
             for (int i = 0; i < 10; i++)
             {
-                var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
+                var pack = new Stickerpack($"Pack {i}", _regularUser) { IsPremium = false };
                 _regularUser!.SaveStickerpack(pack);
+
             }
 
             // Act & Assert - 11th pack should fail
-            var extraPack = new Stickerpack { Name = "Extra Pack", IsPremium = false };
+            var extraPack = new Stickerpack ( "Extra Pack", _regularUser) { IsPremium = false };
             Assert.Throws<InvalidOperationException>(() => _regularUser!.SaveStickerpack(extraPack));
         }
 
@@ -237,7 +239,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Act - Save way more than 10 packs
             for (int i = 0; i < 50; i++)
             {
-                var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
+                var pack = new Stickerpack ($"Pack {i}", _premiumUser) {IsPremium = false };
                 _premiumUser!.SaveStickerpack(pack);
             }
 
@@ -349,7 +351,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Act - Save exactly 10 packs
             for (int i = 0; i < 10; i++)
             {
-                var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
+                var pack = new Stickerpack ( $"Pack {i}", _regularUser) { IsPremium = false };
                 _regularUser!.SaveStickerpack(pack);
             }
 
@@ -364,7 +366,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             // Arrange - Fill to limit
             for (int i = 0; i < 10; i++)
             {
-                var pack = new Stickerpack { Name = $"Pack {i}", IsPremium = false };
+                var pack = new Stickerpack ( $"Pack {i}", _regularUser) { IsPremium = false };
                 _regularUser!.SaveStickerpack(pack);
             }
 
@@ -372,7 +374,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             _regularUser!.UnsaveStickerpack(_regularUser.SavedStickerpacks.First());
 
             // Assert - Should be able to save a new one
-            var newPack = new Stickerpack { Name = "New Pack", IsPremium = false };
+            var newPack = new Stickerpack ("New Pack", _regularUser) { IsPremium = false };
             Assert.DoesNotThrow(() => _regularUser.SaveStickerpack(newPack));
             Assert.That(_regularUser.SavedStickerpacks.Count, Is.EqualTo(10));
         }
@@ -401,7 +403,7 @@ namespace ABDULLAgram.Tests.QualifiedBasicAssociations
             var chat2 = new Group { Name = "Family" };
             var user1 = new Regular("Alice", "+48111222333", true, 5);
             var user2 = new Regular("Bob", "+48222333444", true, 3);
-            var pack1 = new Stickerpack { Name = "Emojis", IsPremium = false };
+            var pack1 = new Stickerpack ("Emojis", user1) { IsPremium = false };
 
             // Act - Create multiple associations
             chat1.AddMember(user1);

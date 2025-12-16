@@ -1,3 +1,4 @@
+using ABDULLAgram.Chats;
 using ABDULLAgram.Users;
 
 namespace ABDULLAgram.Support
@@ -64,14 +65,61 @@ namespace ABDULLAgram.Support
         
         public void Delete()
         {
-            // Remove from extent 
-            Extent.Remove(this);
-            
-            // REVERSE CONNECTION: Remove from owner's collection
-            if (_owner != null)
+            // Break aggregation links (Folder ↔ Chat)
+            foreach (var chat in _chats.ToList())
             {
-                _owner.RemoveFolderInternal(this);
+                chat.RemoveFromFolderInternal(this);
             }
+            _chats.Clear();
+
+            // Remove from extent
+            Extent.Remove(this);
+
+            // Remove from owner's collection (composition)
+            _owner.RemoveFolderInternal(this);
         }
+
+        
+        // ============================================================
+        // AGGREGATION: Folder ↔ Chat (many-to-many)
+        // Folder CONTAINS chats, but does NOT own them
+        // ============================================================
+
+        private readonly HashSet<Chat> _chats = new();
+        public IReadOnlyCollection<Chat> Chats => _chats.ToList().AsReadOnly();
+
+        public const int MaxChatsPerFolder = 100;
+        
+        public void AddChat(Chat chat)
+        {
+            if (chat == null)
+                throw new ArgumentNullException(nameof(chat));
+
+            if (_chats.Contains(chat))
+                return;
+
+            if (_chats.Count >= MaxChatsPerFolder)
+                throw new InvalidOperationException("A folder cannot contain more than 100 chats.");
+
+            _chats.Add(chat);
+
+            // REVERSE CONNECTION (internal)
+            chat.AddToFolderInternal(this);
+        }
+
+        public void RemoveChat(Chat chat)
+        {
+            if (chat == null)
+                throw new ArgumentNullException(nameof(chat));
+
+            if (!_chats.Contains(chat))
+                return;
+
+            _chats.Remove(chat);
+
+            // REVERSE CONNECTION (internal)
+            chat.RemoveFromFolderInternal(this);
+        }
+
     }
 }

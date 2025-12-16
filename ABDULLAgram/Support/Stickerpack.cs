@@ -26,6 +26,12 @@ namespace ABDULLAgram.Support
         }
 
         public bool IsPremium { get; set; }
+        
+        public Stickerpack(string name, User manager)
+        {
+            Name = name;
+            SetManager(manager);
+        }
 
         // ============================================================
         // QUALIFIED AGGREGATION: Stickerpack ↔ Sticker (1 pack → 1..50 stickers)
@@ -141,5 +147,34 @@ namespace ABDULLAgram.Support
         {
             _savedByUsers.Remove(user);
         }
+        
+        // ============================================================
+        // BASIC ASSOCIATION: Stickerpack (0..*) — managed by — User (1)
+        // Each Stickerpack has exactly ONE manager
+        // ============================================================
+
+        private User? _manager;
+        public User Manager
+        {
+            get => _manager ?? throw new InvalidOperationException("Stickerpack must have a manager.");
+        }
+
+        public void SetManager(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (_manager == user)
+                return;
+
+            // Remove reverse connection from old manager
+            _manager?.RemoveManagedStickerpackInternal(this);
+
+            _manager = user;
+
+            // Reverse connection (internal)
+            user.AddManagedStickerpackInternal(this);
+        }
+
     }
 }
