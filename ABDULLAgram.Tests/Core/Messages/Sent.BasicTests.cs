@@ -17,7 +17,7 @@ namespace ABDULLAgram.Tests.Core.Messages
             Regular.ClearExtent();
             
             _user = new Regular("sender", "+123456789", true, 1);
-            _chat = new Group { Name = "Test Group" };
+            _chat = new Chat(ChatType.Group) { Name = "Test Group" };
             
             _chat.AddMember(_user);
         }
@@ -54,7 +54,7 @@ namespace ABDULLAgram.Tests.Core.Messages
             Sent.ClearExtent();
             Regular.ClearExtent();
             _user = new Regular("sender", "+987654321", true, 1);
-            _chat = new Group { Name = "Validation Group" };
+            _chat = new Chat(ChatType.Group) { Name = "Validation Group" };
             
             _chat.AddMember(_user);
         }
@@ -175,7 +175,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         {
             var u1 = new Regular("user1", "+11111", true, 1);
             var u2 = new Regular("user2", "+22222", false, 2);
-            var c1 = new Group { Name = "Group1" };
+            var c1 = new Chat(ChatType.Group) { Name = "Group1" };
 
             c1.AddMember(u1);
             c1.AddMember(u2);
@@ -206,7 +206,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
         {
             var u = new Regular("temp", "+999", true, 1);
-            var c = new Group { Name = "G" };
+            var c = new Chat(ChatType.Group) { Name = "G" };
             c.AddMember(u);
 
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
@@ -221,7 +221,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Save_ThrowsException_IfPathInvalid()
         {
             var u = new Regular("temp", "+999", true, 1);
-            var c = new Group { Name = "G" };
+            var c = new Chat(ChatType.Group) { Name = "G" };
             c.AddMember(u);
 
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);

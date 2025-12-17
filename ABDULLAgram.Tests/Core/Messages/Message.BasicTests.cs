@@ -10,8 +10,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         private class TestUser : Regular { 
             public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
         }
-        private class TestChat : Group { 
-            public TestChat() { Name = "Test Group"; } 
+        private class TestChat : Chat { 
+            public TestChat() : base(ChatType.Group) { Name = "Test Group"; } 
         }
 
         // Counter to ensure unique emoji codes across tests

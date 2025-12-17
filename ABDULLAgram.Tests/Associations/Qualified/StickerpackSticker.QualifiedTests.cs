@@ -8,7 +8,12 @@ namespace ABDULLAgram.Tests.Associations.Qualified
     public class StickerpackAggregationTests
     {
         [SetUp]
-        public void Setup() => Sticker.ClearExtent();
+        public void Setup()
+        {
+            Sticker.ClearExtent();
+            Regular.ClearExtent();
+            Premium.ClearExtent();
+        }
         
         private class TestUser : Regular
         {
@@ -39,9 +44,9 @@ namespace ABDULLAgram.Tests.Associations.Qualified
         [Test]
         public void AddSticker_MovesStickerBetweenPacks()
         {
-            var ownerA = new TestUser("Owner");
+            var ownerA = new TestUser("OwnerA");
             var packA = new Stickerpack("PackA", ownerA) { IsPremium = false };
-            var ownerB = new TestUser("Owner");
+            var ownerB = new TestUser("OwnerB");
             var packB = new Stickerpack("PackB", ownerB) { IsPremium = false };
             var s1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var s2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);

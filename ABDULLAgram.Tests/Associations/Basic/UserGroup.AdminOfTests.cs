@@ -22,7 +22,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
         public void SetAdmin_SetsReverseConnection()
         {
             var user = new TestUser("Alice");
-            var group = new Group { Name = "Study Group" };
+            var group = new Chat(ChatType.Group) { Name = "Study Group" };
 
             group.SetAdmin(user);
 
@@ -35,7 +35,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
         {
             var alice = new TestUser("Alice");
             var bob = new TestUser("Bob");
-            var group = new Group { Name = "Study Group" };
+            var group = new Chat(ChatType.Group) { Name = "Study Group" };
 
             group.SetAdmin(alice);
             group.SetAdmin(bob);
@@ -50,7 +50,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
         {
             var admin = new TestUser("Admin");
             var user = new TestUser("User");
-            var group = new Group { Name = "Study Group" };
+            var group = new Chat(ChatType.Group) { Name = "Study Group" };
 
             group.AddMember(admin);
             group.AddMember(user);
