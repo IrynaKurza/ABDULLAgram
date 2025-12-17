@@ -10,8 +10,7 @@ public class IntegrationTests
     [SetUp]
     public void SetUp()
     {
-        Regular.ClearExtent();
-        Premium.ClearExtent();
+        User.ClearExtent();
     }
 
     // TEST: Complex scenario with multiple associations
@@ -21,8 +20,8 @@ public class IntegrationTests
         // Arrange
         var chat1 = new Group { Name = "Friends" };
         var chat2 = new Group { Name = "Family" };
-        var user1 = new Regular("Alice", "+48111222333", true, 5);
-        var user2 = new Regular("Bob", "+48222333444", true, 3);
+        var user1 = new User("Alice", "+48111222333", true, new RegularUserBehavior(adFrequency: 5));
+        var user2 = new User("Bob", "+48222333444", true, new RegularUserBehavior(adFrequency: 3));
         var pack1 = new Stickerpack ("Emojis", user1) { IsPremium = false };
 
         // Act - Create multiple associations

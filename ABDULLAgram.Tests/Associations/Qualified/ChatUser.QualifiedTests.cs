@@ -13,17 +13,16 @@ namespace ABDULLAgram.Tests.Associations.Qualified
     [TestFixture]
     public class QualifiedAssociationTests
     {
-        private Regular? _user1;
-        private Regular? _user2;
+        private User? _user1;
+        private User? _user2;
         private Group? _testChat;
 
         [SetUp]
         public void SetUp()
         {
-            Regular.ClearExtent();
-            Premium.ClearExtent();
-            _user1 = new Regular("Alice", "+48111222333", true, 5);
-            _user2 = new Regular("Bob", "+48222333444", true, 3);
+            User.ClearExtent();
+            _user1 = new User("Alice", "+48111222333", true, new RegularUserBehavior(5));
+            _user2 = new User("Bob", "+48222333444", true, new RegularUserBehavior(3));
             _testChat = new Group { Name = "Test Group", Description = "Test Description" };
         }
 
@@ -186,18 +185,26 @@ namespace ABDULLAgram.Tests.Associations.Qualified
     [TestFixture]
     public class BasicAssociationTests
     {
-        private Regular? _regularUser;
-        private Premium? _premiumUser;
+        private User? _regularUser;
+        private User? _premiumUser;
         private Stickerpack? _pack1;
         private Stickerpack? _pack2;
 
         [SetUp]
         public void SetUp()
         {
-            Regular.ClearExtent();
-            Premium.ClearExtent();
-            _regularUser = new Regular("Alice", "+48111222333", true, 5);
-            _premiumUser = new Premium("Bob", "+48222333444", true, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(30));
+            User.ClearExtent();
+            _regularUser = new User("Alice", "+48111222333", true, new RegularUserBehavior(5));
+            _premiumUser = new User(
+                username: "Bob",
+                phoneNumber: "+48222333444",
+                isOnline: true,
+                behavior: new PremiumUserBehavior(
+                    DateTime.Now.AddDays(-30),
+                    DateTime.Now.AddDays(30)
+                )
+            );
+
             _pack1 = new Stickerpack("Funny Pack", _regularUser) { IsPremium = false };
             _pack2 = new Stickerpack("Premium Pack", _premiumUser) { IsPremium = true };
 

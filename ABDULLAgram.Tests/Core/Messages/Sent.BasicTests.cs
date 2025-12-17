@@ -14,9 +14,9 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent();
+            User.ClearExtent();
             
-            _user = new Regular("sender", "+123456789", true, 1);
+            _user = new User("sender", "+123456789", true, new RegularUserBehavior(1));
             _chat = new Group { Name = "Test Group" };
             
             _chat.AddMember(_user);
@@ -52,8 +52,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent();
-            _user = new Regular("sender", "+987654321", true, 1);
+            User.ClearExtent();
+            _user = new User("sender", "+987654321", true, new RegularUserBehavior(1));
             _chat = new Group { Name = "Validation Group" };
             
             _chat.AddMember(_user);
@@ -163,7 +163,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent();
+            User.ClearExtent();
             Persistence.DeleteAll(TestPath);
         }
 
@@ -173,8 +173,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void SaveAndLoad_PreservesAllData()
         {
-            var u1 = new Regular("user1", "+11111", true, 1);
-            var u2 = new Regular("user2", "+22222", false, 2);
+            var u1 = new User("user1", "+11111", true, new RegularUserBehavior(1));
+            var u2 = new User("user2", "+22222", false, new RegularUserBehavior(2));
             var c1 = new Group { Name = "Group1" };
 
             c1.AddMember(u1);
@@ -190,7 +190,7 @@ namespace ABDULLAgram.Tests.Core.Messages
             Assert.That(File.Exists(TestPath), Is.True);
 
             Sent.ClearExtent();
-            Regular.ClearExtent(); 
+            User.ClearExtent(); 
             
             var ok = Persistence.LoadAll(TestPath);
 
@@ -205,7 +205,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
         {
-            var u = new Regular("temp", "+999", true, 1);
+            var u = new User("temp", "+999", true, new RegularUserBehavior(1));
             var c = new Group { Name = "G" };
             c.AddMember(u);
 
@@ -220,7 +220,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Save_ThrowsException_IfPathInvalid()
         {
-            var u = new Regular("temp", "+999", true, 1);
+            var u = new User("temp", "+999", true, new RegularUserBehavior(1));
             var c = new Group { Name = "G" };
             c.AddMember(u);
 
