@@ -8,7 +8,12 @@ namespace ABDULLAgram.Tests.Associations.Qualified
     public class StickerpackAggregationTests
     {
         [SetUp]
-        public void Setup() => Sticker.ClearExtent();
+        public void Setup()
+        {
+            // Clear extents to prevent ID/Phone collisions between tests
+            Sticker.ClearExtent();
+            Regular.ClearExtent();
+        }
         
         private class TestUser : Regular
         {
@@ -39,10 +44,13 @@ namespace ABDULLAgram.Tests.Associations.Qualified
         [Test]
         public void AddSticker_MovesStickerBetweenPacks()
         {
-            var ownerA = new TestUser("Owner");
+            // FIX: Use different names so they get different phone numbers!
+            var ownerA = new TestUser("OwnerA"); 
             var packA = new Stickerpack("PackA", ownerA) { IsPremium = false };
-            var ownerB = new TestUser("Owner");
+            
+            var ownerB = new TestUser("OwnerB");
             var packB = new Stickerpack("PackB", ownerB) { IsPremium = false };
+            
             var s1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var s2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);
 
