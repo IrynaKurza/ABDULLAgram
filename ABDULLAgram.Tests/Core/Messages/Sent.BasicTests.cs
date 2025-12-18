@@ -1,23 +1,20 @@
-﻿using ABDULLAgram.Chats;
-using ABDULLAgram.Messages;
+﻿using ABDULLAgram.Messages;
 using ABDULLAgram.Users;
+using ABDULLAgram.Chats;
 
 namespace ABDULLAgram.Tests.Core.Messages
 {
     [TestFixture]
     public class SentTests
     {
-        private User _user;
-        private Chat _chat;
-
         [SetUp]
         public void Setup()
         {
             Sent.ClearExtent();
             User.ClearExtent();
             
-            _user = new User("sender", "+123456789", true, new RegularUserBehavior(1));
-            _chat = new Group { Name = "Test Group" };
+            _user = new Regular("sender", "+123456789", true, 1);
+            _chat = new Chat(ChatType.Group) { Name = "Test Group" };
             
             _chat.AddMember(_user);
         }
@@ -25,7 +22,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Constructor_AddsToExtent()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            // Sent is now a component, initialized with timestamps only
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
 
             Assert.That(Sent.GetAll().Count, Is.EqualTo(1));
             Assert.That(Sent.GetAll().First().SendTimestamp, Is.LessThanOrEqualTo(DateTime.Now));
@@ -34,7 +32,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void GetAll_IsReadOnly()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
             var view = Sent.GetAll();
 
             Assert.Throws<NotSupportedException>(() =>
@@ -45,16 +43,13 @@ namespace ABDULLAgram.Tests.Core.Messages
     [TestFixture]
     public class SentValidationTests
     {
-        private User _user;
-        private Chat _chat;
-
         [SetUp]
         public void Setup()
         {
             Sent.ClearExtent();
-            User.ClearExtent();
-            _user = new User("sender", "+987654321", true, new RegularUserBehavior(1));
-            _chat = new Group { Name = "Validation Group" };
+            Regular.ClearExtent();
+            _user = new Regular("sender", "+987654321", true, 1);
+            _chat = new Chat(ChatType.Group) { Name = "Validation Group" };
             
             _chat.AddMember(_user);
         }
@@ -62,8 +57,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Duplicate_Id_Throws()
         {
-            var s1 = new Sent(_user, _chat, DateTime.Now, DateTime.Now, null, null);
-            var s2 = new Sent(_user, _chat, DateTime.Now, DateTime.Now, null, null);
+            var s1 = new Sent(DateTime.Now, DateTime.Now, null, null);
+            var s2 = new Sent(DateTime.Now, DateTime.Now, null, null);
             
             Assert.Throws<InvalidOperationException>(() =>
                 s2.Id = s1.Id);
@@ -72,7 +67,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_SendTimestamp_Future_Throws()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.SendTimestamp = DateTime.Now.AddDays(1));
@@ -81,7 +76,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_DeliveredAt_Future_Throws()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.DeliveredAt = DateTime.Now.AddDays(1));
@@ -91,7 +86,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Set_DeliveredAt_BeforeSendTimestamp_Throws()
         {
             var sendTime = DateTime.Now.AddMinutes(-10);
-            var sent = new Sent(_user, _chat, sendTime, DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(sendTime, DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.DeliveredAt = sendTime.AddMinutes(-5));
@@ -100,7 +95,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_EditedAt_Future_Throws()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.EditedAt = DateTime.Now.AddDays(1));
@@ -110,7 +105,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Set_EditedAt_BeforeSendTimestamp_Throws()
         {
             var sendTime = DateTime.Now.AddMinutes(-10);
-            var sent = new Sent(_user, _chat, sendTime, DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(sendTime, DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.EditedAt = sendTime.AddMinutes(-5));
@@ -119,7 +114,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_EditedAt_Null_Succeeds()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), DateTime.Now.AddMinutes(-3), null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), DateTime.Now.AddMinutes(-3), null);
             
             sent.EditedAt = null;
             Assert.That(sent.EditedAt, Is.Null);
@@ -128,7 +123,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_DeletedAt_Future_Throws()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.DeletedAt = DateTime.Now.AddDays(1));
@@ -138,7 +133,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Set_DeletedAt_BeforeSendTimestamp_Throws()
         {
             var sendTime = DateTime.Now.AddMinutes(-10);
-            var sent = new Sent(_user, _chat, sendTime, DateTime.Now.AddMinutes(-5), null, null);
+            var sent = new Sent(sendTime, DateTime.Now.AddMinutes(-5), null, null);
             
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 sent.DeletedAt = sendTime.AddMinutes(-5));
@@ -147,7 +142,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Set_DeletedAt_Null_Succeeds()
         {
-            var sent = new Sent(_user, _chat, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, DateTime.Now.AddMinutes(-2));
+            var sent = new Sent(DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, DateTime.Now.AddMinutes(-2));
             
             sent.DeletedAt = null;
             Assert.That(sent.DeletedAt, Is.Null);
@@ -173,9 +168,9 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void SaveAndLoad_PreservesAllData()
         {
-            var u1 = new User("user1", "+11111", true, new RegularUserBehavior(1));
-            var u2 = new User("user2", "+22222", false, new RegularUserBehavior(2));
-            var c1 = new Group { Name = "Group1" };
+            var u1 = new Regular("user1", "+11111", true, 1);
+            var u2 = new Regular("user2", "+22222", false, 2);
+            var c1 = new Chat(ChatType.Group) { Name = "Group1" };
 
             c1.AddMember(u1);
             c1.AddMember(u2);
@@ -205,8 +200,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
         {
-            var u = new User("temp", "+999", true, new RegularUserBehavior(1));
-            var c = new Group { Name = "G" };
+            var u = new Regular("temp", "+999", true, 1);
+            var c = new Chat(ChatType.Group) { Name = "G" };
             c.AddMember(u);
 
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
@@ -220,8 +215,8 @@ namespace ABDULLAgram.Tests.Core.Messages
         [Test]
         public void Save_ThrowsException_IfPathInvalid()
         {
-            var u = new User("temp", "+999", true, new RegularUserBehavior(1));
-            var c = new Group { Name = "G" };
+            var u = new Regular("temp", "+999", true, 1);
+            var c = new Chat(ChatType.Group) { Name = "G" };
             c.AddMember(u);
 
             new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);

@@ -13,17 +13,18 @@ namespace ABDULLAgram.Tests.Associations.Qualified
     [TestFixture]
     public class QualifiedAssociationTests
     {
-        private User? _user1;
-        private User? _user2;
-        private Group? _testChat;
+        private Regular? _user1;
+        private Regular? _user2;
+        private Chat? _testChat;
 
         [SetUp]
         public void SetUp()
         {
-            User.ClearExtent();
-            _user1 = new User("Alice", "+48111222333", true, new RegularUserBehavior(5));
-            _user2 = new User("Bob", "+48222333444", true, new RegularUserBehavior(3));
-            _testChat = new Group { Name = "Test Group", Description = "Test Description" };
+            Regular.ClearExtent();
+            Premium.ClearExtent();
+            _user1 = new Regular("Alice", "+48111222333", true, 5);
+            _user2 = new Regular("Bob", "+48222333444", true, 3);
+            _testChat = new Chat(ChatType.Group) { Name = "Test Group", Description = "Test Description" };
         }
 
         // TEST: Adding member from Chat side creates bidirectional link

@@ -19,7 +19,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
 
     internal class TestChat : Chat
     {
-        public TestChat()
+        public TestChat() : base(ChatType.Group)
         {
             Name = "Test Chat";
         }

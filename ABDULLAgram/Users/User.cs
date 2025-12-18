@@ -437,17 +437,17 @@ namespace ABDULLAgram.Users
         // BASIC ASSOCIATION (reverse): User — admin of — Group
         // ============================================================
 
-        private readonly HashSet<Group> _adminOfGroups = new();
-        public IReadOnlyCollection<Group> AdminOfGroups => _adminOfGroups.ToList().AsReadOnly();
+        private readonly HashSet<Chat> _adminOfGroups = new();
+        public IReadOnlyCollection<Chat> AdminOfGroups => _adminOfGroups.ToList().AsReadOnly();
 
-        internal void AddAdminOfGroupInternal(Group group)
+        internal void AddAdminOfGroupInternal(Chat chat)
         {
-            _adminOfGroups.Add(group);
+            _adminOfGroups.Add(chat);
         }
 
-        internal void RemoveAdminOfGroupInternal(Group group)
+        internal void RemoveAdminOfGroupInternal(Chat chat)
         {
-            _adminOfGroups.Remove(group);
+            _adminOfGroups.Remove(chat);
         }
 
         // ============================================================

@@ -4,9 +4,12 @@ using ABDULLAgram.Users;
 namespace ABDULLAgram.Messages
 {
     [Serializable]
-    public class Sent : Message
+    public class Sent
     {
-        // Sent-specific attributes
+        // ============================================================
+        // COMPONENT ATTRIBUTES
+        // ============================================================
+        
         private DateTime _sendTimestamp;
         public DateTime SendTimestamp
         {
@@ -67,21 +70,24 @@ namespace ABDULLAgram.Messages
             }
         }
 
-        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
-        public override string Id
-        {
-            get => base.Id;
-            set
+        // Component ID for Extent
+        private string _id = Guid.NewGuid().ToString();
+        public string Id 
+        { 
+            get => _id; 
+            set 
             {
-                bool exists = _extent.Any(m => !ReferenceEquals(m, this) && m.Id == value);
-                if (exists)
-                    throw new InvalidOperationException("Sent Id must be unique among all Sent messages.");
-                
-                base.Id = value; // Calls parent validation
+                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("Id cannot be empty.");
+                if (_extent.Any(s => s.Id == value && !ReferenceEquals(s, this)))
+                    throw new InvalidOperationException("Sent Id must be unique.");
+                _id = value;
             }
         }
 
-        // Class Extent
+        // ============================================================
+        // CLASS EXTENT
+        // ============================================================
+
         private static readonly List<Sent> _extent = new();
         public static IReadOnlyCollection<Sent> GetAll() => _extent.AsReadOnly();
         private void AddToExtent() => _extent.Add(this);
@@ -93,27 +99,29 @@ namespace ABDULLAgram.Messages
             _extent.Add(s);
         }
 
-        // Constructors
-        public Sent(User sender, Chat chat, DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
-            : base(sender, chat)
+        public void Delete()
+        {
+            _extent.Remove(this);
+        }
+
+        // ============================================================
+        // CONSTRUCTORS
+        // ============================================================
+
+        public Sent(DateTime sendTimestamp, DateTime deliveredAt, DateTime? editedAt, DateTime? deletedAt)
         {
             SendTimestamp = sendTimestamp;
             DeliveredAt = deliveredAt;
             EditedAt = editedAt;
             DeletedAt = deletedAt;
-            SetSize(0);
-
+            
             AddToExtent();
         }
 
-        private Sent() { } // for XML serialization
-        protected override void RemoveFromExtent()
-        {
-            _extent.Remove(this);
-        }
-        
+        private Sent() { } // XML serialization
+
         // ============================================================
-        // BASIC ASSOCIATION: Sent (0..*) — read by — User (0..*)
+        // ASSOCIATION: Sent (0..*) — read by — User (0..*)
         // ============================================================
 
         private readonly HashSet<User> _readByUsers = new();
@@ -132,6 +140,5 @@ namespace ABDULLAgram.Messages
             // REVERSE CONNECTION (internal)
             user.AddReadMessageInternal(this);
         }
-
     }
 }
