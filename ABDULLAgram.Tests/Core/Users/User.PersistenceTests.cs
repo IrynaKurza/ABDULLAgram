@@ -20,9 +20,11 @@ namespace ABDULLAgram.Tests.Core.Users;
         [Test]
         public void SaveAndLoad_PreservesAllData()
         {
-            new User("alice", "+000", true, new RegularUserBehavior(adFrequency: 2)) { LastSeenAt = DateTime.Today };
-            new User("bob", "+111", false, new RegularUserBehavior(adFrequency: 5)) { LastSeenAt = null };
-
+            var user1 = new User("alice", "+000", true) { LastSeenAt = DateTime.Today };
+            user1.InitializeAsRegular(2);
+            var user2 = new User("bob", "+111", false) { LastSeenAt = null };
+            user2.InitializeAsRegular(5);
+            
             Persistence.SaveAll(TestPath);
             Assert.That(File.Exists(TestPath), Is.True);
 
@@ -40,8 +42,9 @@ namespace ABDULLAgram.Tests.Core.Users;
         [Test]
         public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
         {
-            new User("temp", "+999", false, new RegularUserBehavior(adFrequency: 9));
-
+            var user = new User("temp", "+999", false);
+            user.InitializeAsRegular(9);
+            
             var ok = Persistence.LoadAll("__does_not_exist__.xml");
 
             Assert.IsFalse(ok);
@@ -51,7 +54,8 @@ namespace ABDULLAgram.Tests.Core.Users;
         [Test]
         public void Save_ThrowsException_IfPathInvalid()
         {
-            new User("err", "+999", true, new RegularUserBehavior(adFrequency: 1));
+            var user = new User("err", "+999", true);
+            user.InitializeAsRegular(1);
 
             Assert.Throws<DirectoryNotFoundException>(() =>
                 Persistence.SaveAll("Z:/folder_does_not_exist/regulars.xml"));

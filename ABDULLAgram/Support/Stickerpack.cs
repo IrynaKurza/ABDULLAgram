@@ -119,7 +119,8 @@ namespace ABDULLAgram.Support
             _savedByUsers.Add(user);
             
             // REVERSE CONNECTION: Tell user about this pack
-            user.AddStickerpackInternal(this);
+            // FIX: Should add to SavedStickerpacks, not ManagedStickerpacks!
+            user.AddSavedStickerpackInternal(this);
         }
 
         public void RemoveSavedByUser(User user)
@@ -133,7 +134,8 @@ namespace ABDULLAgram.Support
             _savedByUsers.Remove(user);
             
             // REVERSE CONNECTION: Tell user to forget this pack
-            user.RemoveStickerpackInternal(this);
+            // FIX: Should remove from SavedStickerpacks, not ManagedStickerpacks!
+            user.RemoveSavedStickerpackInternal(this);
         }
 
         // INTERNAL METHOD: Called by User.SaveStickerpack()

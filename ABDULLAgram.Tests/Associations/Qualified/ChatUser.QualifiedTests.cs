@@ -21,8 +21,10 @@ namespace ABDULLAgram.Tests.Associations.Qualified
         public void SetUp()
         {
             User.ClearExtent();
-            _user1 = new User("Alice", "+48111222333", true, new RegularUserBehavior(5));
-            _user2 = new User("Bob", "+48222333444", true, new RegularUserBehavior(3));
+            _user1 = new User("Alice", "+48111222333", true);
+            _user1.InitializeAsRegular(5);
+            _user2 = new User("Bob", "+48222333444", true);
+            _user2.InitializeAsRegular(3);
             _testChat = new Group { Name = "Test Group", Description = "Test Description" };
         }
 
@@ -194,15 +196,12 @@ namespace ABDULLAgram.Tests.Associations.Qualified
         public void SetUp()
         {
             User.ClearExtent();
-            _regularUser = new User("Alice", "+48111222333", true, new RegularUserBehavior(5));
-            _premiumUser = new User(
-                username: "Bob",
-                phoneNumber: "+48222333444",
-                isOnline: true,
-                behavior: new PremiumUserBehavior(
-                    DateTime.Now.AddDays(-30),
-                    DateTime.Now.AddDays(30)
-                )
+            _regularUser = new User("Alice", "+48111222333", true);
+            _regularUser.InitializeAsRegular(5);
+            _premiumUser = new User("Bob", "+48222333444", true);
+            _premiumUser.InitializeAsPremium(
+                DateTime.Now.AddDays(-30),
+                DateTime.Now.AddDays(30)
             );
 
             _pack1 = new Stickerpack("Funny Pack", _regularUser) { IsPremium = false };

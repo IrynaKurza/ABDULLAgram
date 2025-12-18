@@ -7,13 +7,9 @@ namespace ABDULLAgram.Tests.Associations.Basic
     internal class TestUserForText : User
     {
         public TestUserForText()
-            : base(
-                "TestUser",
-                "555-0199",
-                true,
-                new RegularUserBehavior(1)
-            )
+            : base("TestUser", "555-0199", true)
         {
+            InitializeAsRegular(1);
         }
     }
 
@@ -32,6 +28,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
         public void SetUp()
         {
             Text.ClearExtent();
+            User.ClearExtent();
         }
 
         [Test]

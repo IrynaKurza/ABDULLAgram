@@ -9,6 +9,7 @@ namespace ABDULLAgram
     [Serializable]
     public class DataSnapshot
     {
+        // CHANGED: Now we have single User list instead of Regular/Premium
         public List<User> Users { get; set; } = new();
         public List<Sent> Sents { get; set; } = new();
         public List<Draft> Drafts { get; set; } = new();
@@ -28,7 +29,7 @@ namespace ABDULLAgram
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 throw new DirectoryNotFoundException($"Directory does not exist: {dir}");
-
+            
             var snap = new DataSnapshot
             {
                 Users    = new List<User>(User.GetAll()),
@@ -76,43 +77,40 @@ namespace ABDULLAgram
                 ABDULLAgram.Attachments.File.ClearExtent();
                 Sticker.ClearExtent();
 
-                foreach (var u in snap.Users)    User.ReAdd(u);
-                foreach (var s in snap.Sents)    Sent.ReAdd(s);
-                foreach (var d in snap.Drafts)   Draft.ReAdd(d);
-                foreach (var i in snap.Images)   Image.ReAdd(i);
-                foreach (var t in snap.Texts)    Text.ReAdd(t);
-                foreach (var v in snap.Videos)   Video.ReAdd(v);
-                foreach (var f in snap.Files)    ABDULLAgram.Attachments.File.ReAdd(f);
-                foreach (var st in snap.Stickers) Sticker.ReAdd(st);
+                // Re-add all Users
+                foreach (var user in snap.Users)
+                    User.ReAdd(user);
+
+                // Re-add all messages
+                foreach (var sent in snap.Sents)
+                    Sent.ReAdd(sent);
+                foreach (var draft in snap.Drafts)
+                    Draft.ReAdd(draft);
+
+                // Re-add all attachments
+                foreach (var img in snap.Images)
+                    Image.ReAdd(img);
+                foreach (var txt in snap.Texts)
+                    Text.ReAdd(txt);
+                foreach (var vid in snap.Videos)
+                    Video.ReAdd(vid);
+                foreach (var f in snap.Files)
+                    ABDULLAgram.Attachments.File.ReAdd(f);
+                foreach (var sticker in snap.Stickers)
+                    Sticker.ReAdd(sticker);
 
                 return true;
             }
             catch
             {
-                User.ClearExtent();
-                Sent.ClearExtent();
-                Draft.ClearExtent();
-                Image.ClearExtent();
-                Text.ClearExtent();
-                Video.ClearExtent();
-                ABDULLAgram.Attachments.File.ClearExtent();
-                Sticker.ClearExtent();
                 return false;
             }
         }
 
         public static void DeleteAll(string path = AllPath)
         {
-            if (File.Exists(path)) File.Delete(path);
-
-            User.ClearExtent();
-            Sent.ClearExtent();
-            Draft.ClearExtent();
-            Image.ClearExtent();
-            Text.ClearExtent();
-            Video.ClearExtent();
-            ABDULLAgram.Attachments.File.ClearExtent();
-            Sticker.ClearExtent();
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 }

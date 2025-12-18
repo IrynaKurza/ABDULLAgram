@@ -10,16 +10,24 @@ namespace ABDULLAgram.Tests.Associations.Basic
         private class TestUser : User
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+                : base(name, "+" + name.GetHashCode(), true)
             {
+                InitializeAsRegular(1);
             }
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            User.ClearExtent();
+            Sent.ClearExtent(); // only if Sent has extent and is used in these tests
+        }
+        
         [Test]
         public void MarkAsRead_SetsReverseConnection()
         {
-            var sender = new TestUser("Sender");
-            var reader = new TestUser("Reader");
+            var sender = new TestUser("Sender1"); // Unique name
+            var reader = new TestUser("Reader1"); // Unique name
             var chat = new Group { Name = "Chat" };
 
             sender.JoinChat(chat);
@@ -44,8 +52,8 @@ namespace ABDULLAgram.Tests.Associations.Basic
         [Test]
         public void MarkAsRead_Twice_DoesNotDuplicate()
         {
-            var sender = new TestUser("Sender");
-            var reader = new TestUser("Reader");
+            var sender = new TestUser("Sender2"); // Unique name
+            var reader = new TestUser("Reader2"); // Unique name
             var chat = new Group { Name = "Chat" };
 
             sender.JoinChat(chat);

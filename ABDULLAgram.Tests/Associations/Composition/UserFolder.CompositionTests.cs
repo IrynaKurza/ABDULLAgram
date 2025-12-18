@@ -10,11 +10,19 @@ namespace ABDULLAgram.Tests.Associations.Composition
         private class TestUser : User
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+                : base(name, "+" + name.GetHashCode(), true)
             {
+                InitializeAsRegular(1);
             }
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            User.ClearExtent();
+            Folder.ClearExtent();
+        }
+        
         [Test]
         public void DeleteUser_DeletesAllOwnedFolders()
         {

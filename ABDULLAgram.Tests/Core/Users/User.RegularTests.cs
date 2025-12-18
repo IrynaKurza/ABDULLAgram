@@ -11,7 +11,8 @@ namespace ABDULLAgram.Tests.Core.Users
         [Test]
         public void Constructor_AddsToExtent()
         {
-            var _ = new User("alice", "+380001", true,  new RegularUserBehavior(adFrequency: 3));
+            var user = new User("alice", "+380001", true);
+            user.InitializeAsRegular(3);
 
             Assert.That(User.GetAll().Count, Is.EqualTo(1));
             Assert.That(User.GetAll().First().Username, Is.EqualTo("alice"));
@@ -21,7 +22,9 @@ namespace ABDULLAgram.Tests.Core.Users
         [Test]
         public void GetAll_IsReadOnly()
         {
-            var r = new User("bob", "+111", false,  new RegularUserBehavior(adFrequency: 2));
+            var r = new User("bob", "+111", false);
+            r.InitializeAsRegular(2);
+            
             var view = User.GetAll();
 
             Assert.Throws<NotSupportedException>(() =>

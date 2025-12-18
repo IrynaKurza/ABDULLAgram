@@ -11,16 +11,18 @@ namespace ABDULLAgram.Tests.Core.Users
         [Test]
         public void BlockUser_Self_ThrowsException()
         {
-            var alice = new User("alice", "+100", true, new RegularUserBehavior(adFrequency: 1));
-
+            var alice = new User("alice", "+100", true);
+            alice.InitializeAsRegular(1);
             Assert.Throws<InvalidOperationException>(() => alice.BlockUser(alice));
         }
 
         [Test]
         public void BlockUser_CreatesReverseLink()
         {
-            var alice = new User("alice", "+100", true, new RegularUserBehavior(adFrequency: 1));
-            var bob = new User("bob", "+200", false, new RegularUserBehavior(adFrequency: 2));
+            var alice = new User("alice", "+100", true);
+            alice.InitializeAsRegular(1);
+            var bob = new User("bob", "+200", false);
+            bob.InitializeAsRegular(2);
 
             alice.BlockUser(bob);
 
@@ -31,9 +33,11 @@ namespace ABDULLAgram.Tests.Core.Users
         [Test]
         public void BlockUser_Idempotent_KeepsReverseLinkStable()
         {
-            var alice = new User("alice", "+100", true, new RegularUserBehavior(adFrequency: 1));
-            var bob = new User("bob", "+200", false, new RegularUserBehavior(adFrequency: 2));
-
+            var alice = new User("alice", "+100", true);
+            alice.InitializeAsRegular(1);
+            var bob = new User("bob", "+200", false);
+            bob.InitializeAsRegular(2);
+            
             alice.BlockUser(bob);
             alice.BlockUser(bob);
 

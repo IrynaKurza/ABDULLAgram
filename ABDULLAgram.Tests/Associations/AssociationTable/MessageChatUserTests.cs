@@ -9,8 +9,9 @@ namespace ABDULLAgram.Tests.Associations.AssociationTable
         private class TestUser : User
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+                : base(name, "+" + name.GetHashCode(), true)
             {
+                InitializeAsRegular(1);
             }
         }
 
