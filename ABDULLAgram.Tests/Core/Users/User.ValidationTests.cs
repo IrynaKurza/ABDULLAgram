@@ -6,26 +6,26 @@ namespace ABDULLAgram.Tests.Core.Users;
 public class RegularValidationTests
 {
     [SetUp] 
-    public void Setup() => User.ClearExtent();
+    public void Setup() => Regular.ClearExtent();
 
     [Test]
     public void Ctor_EmptyUsername_Throws()
     {
         Assert.Throws<ArgumentException>(() =>
-            new User("", "+111", true,  new RegularUserBehavior(adFrequency: 1)));
+            new Regular("", "+111", true, 1));
     }
 
     [Test]
     public void Ctor_EmptyPhone_Throws()
     {
         Assert.Throws<ArgumentException>(() =>
-            new User("alice", "   ", true,  new RegularUserBehavior(adFrequency: 1)));
+            new Regular("alice", "   ", true, 1));
     }
 
     [Test]
     public void Set_Username_Empty_Throws()
     {
-        var r = new User("valid", "+111", true,  new RegularUserBehavior(adFrequency: 1));
+        var r = new Regular("valid", "+111", true, 1);
             
         Assert.Throws<ArgumentException>(() => r.Username = "");
         Assert.Throws<ArgumentException>(() => r.Username = "   ");
@@ -34,7 +34,7 @@ public class RegularValidationTests
     [Test]
     public void Set_PhoneNumber_Empty_Throws()
     {
-        var r = new User("valid", "+111", true,  new RegularUserBehavior(adFrequency: 1));
+        var r = new Regular("valid", "+111", true, 1);
 
         Assert.Throws<ArgumentException>(() => r.PhoneNumber = "");
     }
@@ -42,7 +42,7 @@ public class RegularValidationTests
     [Test]
     public void Set_LastSeenAt_Future_Throws()
     {
-        var r = new User("alice", "+111", true,  new RegularUserBehavior(adFrequency: 1));
+        var r = new Regular("alice", "+111", true, 1);
             
         // Valid case
         r.LastSeenAt = DateTime.Now.AddMinutes(-1);
@@ -55,16 +55,16 @@ public class RegularValidationTests
     [Test]
     public void Set_AdFrequency_Negative_Throws()
     {
+        var r = new Regular("alice", "+111", true, 1);
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new RegularUserBehavior(adFrequency: -1)
-        );
+            r.AdFrequency = -1);
     }
         
     [Test]
     public void Ctor_DuplicatePhone_Throws()
     {
-        var _ = new User("alice", "+111", true,  new RegularUserBehavior(adFrequency: 1));
+        var _ = new Regular("alice", "+111", true, 1);
         Assert.Throws<InvalidOperationException>(() =>
-            new User("bob", "+111", false,  new RegularUserBehavior(adFrequency: 2))); 
+            new Regular("bob", "+111", false, 2)); 
     }
 }

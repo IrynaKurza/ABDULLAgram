@@ -2,126 +2,19 @@ using ABDULLAgram.Chats;
 using ABDULLAgram.Support;
 using ABDULLAgram.Attachments;
 using ABDULLAgram.Messages;
+using System.Xml.Serialization;
 
 namespace ABDULLAgram.Users
 {
+    [XmlInclude(typeof(Regular))]
+    [XmlInclude(typeof(Premium))]
     [Serializable]
-    public class User
+    public abstract class User
     {
-        // ============================================================
-        // PERSISTENCE SUPPORT (composition reconstruction)
-        // ============================================================
-
-        public UserType PersistedUserType { get; set; }
-
-        public int? PersistedAdFrequency { get; set; }
-        public DateTime? PersistedPremiumStart { get; set; }
-        public DateTime? PersistedPremiumEnd { get; set; }
-        
-        // ============================================================
-        // CLASS EXTENT PATTERN
-        // ============================================================
-
-        private static readonly List<User> _extent = new();
-        public static IReadOnlyCollection<User> GetAll() => _extent.AsReadOnly();
-
-        private void AddToExtent()
-        {
-            if (_extent.Any(u => u.PhoneNumber == PhoneNumber))
-                throw new InvalidOperationException($"A user with phone number '{PhoneNumber}' already exists.");
-
-            _extent.Add(this);
-        }
-
-        public static void ClearExtent() => _extent.Clear();
-
-        public static void ReAdd(User user)
-        {
-            if (_extent.Any(u => u.PhoneNumber == user.PhoneNumber && !ReferenceEquals(u, user)))
-                throw new InvalidOperationException("Duplicate PhoneNumber found during load of Users.");
-
-            _extent.Add(user);
-            
-            user._behavior = user.PersistedUserType switch
-            {
-                UserType.Regular => new RegularUserBehavior(user.PersistedAdFrequency!.Value),
-                UserType.Premium => new PremiumUserBehavior(
-                    user.PersistedPremiumStart!.Value,
-                    user.PersistedPremiumEnd!.Value
-                ),
-                _ => throw new InvalidOperationException()
-            };
-
-            user._behavior.ValidateOnAttach(user);
-
-        }
-
-        // ============================================================
-        // COMPOSITION-BASED INHERITANCE
-        // ============================================================
-
-        private IUserTypeBehavior _behavior;
-        public UserType UserType => _behavior.Type;
-        public int MaxSavedStickerpacks => _behavior.MaxSavedStickerpacks;
-
-        public User(string username, string phoneNumber, bool isOnline, IUserTypeBehavior behavior)
-        {
-            Username = username;
-            PhoneNumber = phoneNumber;
-            IsOnline = isOnline;
-
-            _behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
-            _behavior.ValidateOnAttach(this);
-
-            AddToExtent();
-            
-            PersistedUserType = _behavior.Type;
-
-            if (_behavior is RegularUserBehavior r)
-            {
-                PersistedAdFrequency = r.AdFrequency;
-            }
-            else if (_behavior is PremiumUserBehavior p)
-            {
-                PersistedPremiumStart = p.PremiumStartDate;
-                PersistedPremiumEnd = p.PremiumEndDate;
-            }
-
-        }
-
-        public void UpgradeToPremium(DateTime start, DateTime end)
-        {
-            if (_behavior is PremiumUserBehavior)
-                throw new InvalidOperationException("User is already Premium.");
-
-            _behavior = new PremiumUserBehavior(start, end);
-
-            PersistedUserType = UserType.Premium;
-            PersistedPremiumStart = start;
-            PersistedPremiumEnd = end;
-            PersistedAdFrequency = null;
-        }
-
-        public RegularUserBehavior AsRegular()
-        {
-            if (_behavior is not RegularUserBehavior regular)
-                throw new InvalidOperationException("User is not Regular.");
-
-            return regular;
-        }
-
-        public PremiumUserBehavior AsPremium()
-        {
-            if (_behavior is not PremiumUserBehavior premium)
-                throw new InvalidOperationException("User is not Premium.");
-
-            return premium;
-        }
-
         // ============================================================
         // BASIC ATTRIBUTES
         // ============================================================
-
+        
         private string _username = "";
         public string Username
         {
@@ -135,7 +28,7 @@ namespace ABDULLAgram.Users
         }
 
         private string _phoneNumber = "";
-        public string PhoneNumber
+        public virtual string PhoneNumber
         {
             get => _phoneNumber;
             set
@@ -152,7 +45,7 @@ namespace ABDULLAgram.Users
                         chat.UpdateMemberPhoneNumber(_phoneNumber, value);
                     }
                 }
-
+                
                 _phoneNumber = value;
             }
         }
@@ -174,7 +67,7 @@ namespace ABDULLAgram.Users
         // ============================================================
         // REFLEX ASSOCIATION: User ↔ User (Block/Unblock)
         // ============================================================
-
+        
         private List<User> _blockedUsers = new();
         private List<User> _blockedBy = new();
 
@@ -183,18 +76,18 @@ namespace ABDULLAgram.Users
             if (user == this)
                 throw new InvalidOperationException("Cannot block yourself.");
             if (_blockedUsers.Contains(user)) return;
-
+            
             // Add to both directions (reflex association = same class on both sides)
             _blockedUsers.Add(user);
-            user._blockedBy.Add(this);
+            user._blockedBy.Add(this); 
         }
 
         public void UnblockUser(User user)
         {
             if (!_blockedUsers.Contains(user)) return;
-
+            
             _blockedUsers.Remove(user);
-            user._blockedBy.Remove(this);
+            user._blockedBy.Remove(this); 
         }
 
         public IReadOnlyCollection<User> GetBlockedUsers() => _blockedUsers.AsReadOnly();
@@ -204,7 +97,7 @@ namespace ABDULLAgram.Users
         // QUALIFIED ASSOCIATION: User ↔ Chat (qualified by phoneNumber)
         // Reverse connection - User knows which Chats they're in
         // ============================================================
-
+        
         private HashSet<Chat> _joinedChats = new HashSet<Chat>();
         public IReadOnlyCollection<Chat> JoinedChats => _joinedChats.ToList().AsReadOnly();
 
@@ -219,7 +112,7 @@ namespace ABDULLAgram.Users
                 throw new InvalidOperationException("User is already a member of this chat.");
 
             _joinedChats.Add(chat);
-
+            
             // REVERSE CONNECTION: Tell the chat about this user
             // Use Internal method to avoid infinite recursion
             chat.AddMemberInternal(this);
@@ -234,7 +127,7 @@ namespace ABDULLAgram.Users
                 throw new InvalidOperationException("User is not a member of this chat.");
 
             _joinedChats.Remove(chat);
-
+            
             // REVERSE CONNECTION: Tell the chat to remove this user
             chat.RemoveMemberInternal(PhoneNumber);
         }
@@ -258,9 +151,10 @@ namespace ABDULLAgram.Users
         // ============================================================
         // BASIC ASSOCIATION: User ↔ Stickerpack (many-to-many)
         // ============================================================
-
+        
         private HashSet<Stickerpack> _savedStickerpacks = new();
         public IReadOnlyCollection<Stickerpack> SavedStickerpacks => _savedStickerpacks.ToList().AsReadOnly();
+        public abstract int MaxSavedStickerpacks { get; }
 
         // PUBLIC METHOD: Use this to save a stickerpack
         public virtual void SaveStickerpack(Stickerpack pack)
@@ -270,13 +164,13 @@ namespace ABDULLAgram.Users
 
             if (_savedStickerpacks.Contains(pack))
                 throw new InvalidOperationException("This stickerpack is already saved.");
-
+            
             // Regular = 10, Premium = unlimited (int.MaxValue)
             if (_savedStickerpacks.Count >= MaxSavedStickerpacks)
                 throw new InvalidOperationException($"Cannot save more than {MaxSavedStickerpacks} stickerpacks.");
 
             _savedStickerpacks.Add(pack);
-
+            
             // REVERSE CONNECTION: Tell pack about this user
             pack.AddSavedByUserInternal(this);
         }
@@ -290,7 +184,7 @@ namespace ABDULLAgram.Users
                 throw new InvalidOperationException("This stickerpack is not saved.");
 
             _savedStickerpacks.Remove(pack);
-
+            
             // REVERSE CONNECTION: Tell pack to remove this user
             pack.RemoveSavedByUserInternal(this);
         }
@@ -311,67 +205,87 @@ namespace ABDULLAgram.Users
 
         // ============================================================
         // COMPOSITION: User owns Folders (1 user → 0..* folders)
+        // Folders are destroyed when User is destroyed
+        // Folder cannot exist without User
         // ============================================================
-
+        
         private readonly HashSet<Folder> _folders = new();
         public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
 
+        // INTERNAL: Called by Folder constructor
+        // Establishes reverse connection when folder is created
         internal void AddFolderInternal(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
             _folders.Add(folder);
         }
 
+        // INTERNAL: Called by Folder.Delete()
+        // Just removes from collection - extent removal handled in Folder
         internal void RemoveFolderInternal(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
             _folders.Remove(folder);
         }
 
+        // Factory method pattern: User creates its own folders
+        // Ensures folder is always created with an owner
         public Folder CreateFolder(string name)
         {
             return new Folder(this, name);
         }
 
+        // Delete single folder - calls folder's Delete method
+        // Folder.Delete() removes from extent AND from user's collection
         public void DeleteFolder(Folder folder)
         {
             if (folder == null) throw new ArgumentNullException(nameof(folder));
             if (!_folders.Contains(folder))
                 throw new InvalidOperationException("Folder does not belong to this user.");
 
+            // Folder.Delete() will call RemoveFolderInternal and remove from extent
             folder.Delete();
         }
 
+        // COMPOSITION: When user is deleted, all folders must be deleted
+        // Each folder is removed from extent (true deletion)
         public void DeleteAllFolders()
         {
+            // ToList() creates copy to avoid collection modification during iteration
             foreach (var folder in _folders.ToList())
             {
-                folder.Delete();
+                folder.Delete(); // Removes from extent AND user's collection
             }
         }
 
+        // DELETE USER: Removes user from extent and deletes all owned folders
+        // This is the proper way to delete a user (composition cleanup)
         public void DeleteUser()
         {
-            foreach (var g in _adminOfGroups.ToList())
-                g.SetAdmin(null!); 
-
-            foreach (var p in _managedStickerpacks.ToList())
-                p.SetManager(null!);
-
-            foreach (var s in _savedStickerpacks.ToList())
-                UnsaveStickerpack(s);
-
+            // First, delete all owned folders (composition rule)
             DeleteAllFolders();
-            _extent.Remove(this);
+            
+            // Then remove user from their extent
+            if (this is Regular)
+            {
+                Regular.RemoveFromExtent((Regular)this);
+            }
+            else if (this is Premium)
+            {
+                Premium.RemoveFromExtent((Premium)this);
+            }
         }
+        
 
         // ============================================================
         // BASIC ASSOCIATION: User ↔ Text (many-to-many)
+        // User can be mentioned in multiple Text messages
         // ============================================================
-
+        
         private readonly HashSet<Text> _mentionedInTexts = new();
         public IReadOnlyCollection<Text> MentionedInTexts => _mentionedInTexts.ToList().AsReadOnly();
 
+        // INTERNAL: Called by Text when adding mention
         internal void AddMentionedInText(Text text)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
@@ -386,11 +300,12 @@ namespace ABDULLAgram.Users
 
         // ============================================================
         // BASIC ASSOCIATION: User → Message (1 user → 0..* messages)
+        // User knows about all messages they sent
         // ============================================================
-
+        
         private readonly List<Message> _messages = new();
         public IReadOnlyList<Message> SentMessages => _messages.AsReadOnly();
-
+        
         internal void AddMessageInternal(Message message)
         {
             _messages.Add(message);
@@ -400,7 +315,9 @@ namespace ABDULLAgram.Users
         {
             _messages.Remove(message);
         }
-
+        
+        // INTERNAL: Called by Message constructor
+        // Message creates the association when it's created
         public void AddMessage(Message message)
         {
             if (message == null)
@@ -413,10 +330,10 @@ namespace ABDULLAgram.Users
 
             if (message.Sender != this)
             {
-                message.SetSenderInternal(this);
+                message.SetSenderInternal(this); 
             }
         }
-
+        
         public void RemoveMessage(Message message)
         {
             if (message == null)
@@ -428,11 +345,11 @@ namespace ABDULLAgram.Users
 
                 if (message.Sender == this)
                 {
-                    message.ClearSenderInternal();
+                    message.ClearSenderInternal(); 
                 }
             }
         }
-
+        
         // ============================================================
         // BASIC ASSOCIATION (reverse): User — admin of — Group
         // ============================================================
@@ -457,7 +374,7 @@ namespace ABDULLAgram.Users
         private readonly HashSet<Stickerpack> _managedStickerpacks = new();
         public IReadOnlyCollection<Stickerpack> ManagedStickerpacks =>
             _managedStickerpacks.ToList().AsReadOnly();
-
+        
         internal void AddManagedStickerpackInternal(Stickerpack pack)
         {
             _managedStickerpacks.Add(pack);
@@ -467,7 +384,7 @@ namespace ABDULLAgram.Users
         {
             _managedStickerpacks.Remove(pack);
         }
-
+        
         // ============================================================
         // BASIC ASSOCIATION (reverse): User — read — Sent
         // ============================================================
@@ -485,5 +402,6 @@ namespace ABDULLAgram.Users
         {
             _readMessages.Remove(message);
         }
+
     }
 }

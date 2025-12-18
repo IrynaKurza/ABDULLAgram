@@ -15,10 +15,10 @@ namespace ABDULLAgram.Tests.Associations.Qualified
             Premium.ClearExtent();
         }
         
-        private class TestUser : User
+        private class TestUser : Regular
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+                : base(name, "+" + name.GetHashCode(), true, 1)
             {
             }
         }

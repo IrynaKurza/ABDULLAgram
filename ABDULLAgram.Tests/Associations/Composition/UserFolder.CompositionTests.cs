@@ -14,10 +14,9 @@ namespace ABDULLAgram.Tests.Associations.Composition
             Folder.ClearExtent();
         }
 
-        private class TestUser : User
+        private class TestUser : Regular
         {
-            public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+            public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1)
             {
             }
         }

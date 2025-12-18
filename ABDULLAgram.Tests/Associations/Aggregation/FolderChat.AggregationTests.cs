@@ -7,22 +7,17 @@ namespace ABDULLAgram.Tests.Associations.Aggregation
     [TestFixture]
     public class FolderChatAggregationTests
     {
-        private class TestUser : User
+        private class TestUser : Regular
         {
             public TestUser(string name)
-                : base(
-                    name,
-                    "+" + name.GetHashCode(),
-                    true,
-                    new RegularUserBehavior(1)
-                ) { }
+                : base(name, "+" + name.GetHashCode(), true, 1) { }
         }
 
         [SetUp]
         public void Setup()
         {
             Folder.ClearExtent();
-            User.ClearExtent();
+            Regular.ClearExtent();
         }
 
         [Test]
