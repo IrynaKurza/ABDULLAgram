@@ -6,6 +6,13 @@ namespace ABDULLAgram.Tests.Associations.Composition
     [TestFixture]
     public class CompositionTests
     {
+        [SetUp]
+        public void Setup()
+        {
+            // Clear extents to prevent ID/Phone collisions between tests
+            Regular.ClearExtent();
+            Folder.ClearExtent();
+        }
 
         private class TestUser : Regular
         {

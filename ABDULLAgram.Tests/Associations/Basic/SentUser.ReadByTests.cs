@@ -20,19 +20,24 @@ namespace ABDULLAgram.Tests.Associations.Basic
             Premium.ClearExtent();
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            Sent.ClearExtent();
+            Regular.ClearExtent();
+        }
+
         [Test]
         public void MarkAsRead_SetsReverseConnection()
         {
-            var sender = new TestUser("Sender");
             var reader = new TestUser("Reader");
             var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
             sender.JoinChat(chat);
             reader.JoinChat(chat);
 
+            // Create Sent component (User/Chat are now part of Message, not Sent)
             var msg = new Sent(
-                sender,
-                chat,
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,
@@ -49,7 +54,6 @@ namespace ABDULLAgram.Tests.Associations.Basic
         [Test]
         public void MarkAsRead_Twice_DoesNotDuplicate()
         {
-            var sender = new TestUser("Sender");
             var reader = new TestUser("Reader");
             var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
@@ -57,8 +61,6 @@ namespace ABDULLAgram.Tests.Associations.Basic
             reader.JoinChat(chat);
 
             var msg = new Sent(
-                sender,
-                chat,
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,

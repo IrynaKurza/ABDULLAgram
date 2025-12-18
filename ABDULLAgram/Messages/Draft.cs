@@ -4,9 +4,8 @@ using ABDULLAgram.Users;
 namespace ABDULLAgram.Messages
 {
     [Serializable]
-    public class Draft : Message
+    public class Draft
     {
-        // Draft-specific attributes
         private DateTime _lastSaveTimestamp;
         public DateTime LastSaveTimestamp
         {
@@ -19,21 +18,37 @@ namespace ABDULLAgram.Messages
             }
         }
 
-        // Override Id to add uniqueness check (like Regular does with PhoneNumber)
-        public override string Id
-        {
-            get => base.Id;
-            set
+        private string _id = Guid.NewGuid().ToString();
+        public string Id 
+        { 
+            get => _id; 
+            set 
             {
-                bool exists = _extent.Any(m => !ReferenceEquals(m, this) && m.Id == value);
-                if (exists)
-                    throw new InvalidOperationException("Draft Id must be unique among all Draft messages.");
-                
-                base.Id = value; // Calls parent validation
+                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("Id cannot be empty.");
+                if (_extent.Any(d => d.Id == value && !ReferenceEquals(d, this)))
+                    throw new InvalidOperationException("Draft Id must be unique.");
+                _id = value;
             }
         }
+        
+        public void SendMessage(Message message)
+        {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+            
+            if (message.Draft != this)
+                throw new InvalidOperationException("This draft does not belong to the provided message.");
 
-        // Class Extent
+            // 1. Create Sent component (Automatic creation)
+            var now = DateTime.Now;
+            var sent = new Sent(now, now, null, null);
+
+            // 2. Set reference on Message (Transition state)
+            // This will assign _sent and set _draft to null in the Message
+            message.PromoteToSent(sent);
+
+            // 3. Delete Draft from extent (Cleanup)
+            this.Delete();
+        }
         private static readonly List<Draft> _extent = new();
         public static IReadOnlyCollection<Draft> GetAll() => _extent.AsReadOnly();
         private void AddToExtent() => _extent.Add(this);
@@ -41,24 +56,21 @@ namespace ABDULLAgram.Messages
         public static void ReAdd(Draft d)
         {
             if (_extent.Any(x => x.Id == d.Id && !ReferenceEquals(x, d)))
-                throw new InvalidOperationException("Duplicate Id found during load of Draft messages.");
+                throw new InvalidOperationException("Duplicate Id found during load of Drafts.");
             _extent.Add(d);
         }
 
-        // Constructors
-        public Draft(User sender, Chat chat, DateTime lastSaveTimestamp)
-            : base(sender, chat)
-        {
-            LastSaveTimestamp = lastSaveTimestamp;
-            SetSize(0);
-
-            AddToExtent();
-        }
-
-        private Draft() { } // for XML serialization
-        protected override void RemoveFromExtent()
+        public void Delete()
         {
             _extent.Remove(this);
         }
+        
+        public Draft(DateTime lastSaveTimestamp)
+        {
+            LastSaveTimestamp = lastSaveTimestamp;
+            AddToExtent();
+        }
+
+        private Draft() { } // XML
     }
 }
