@@ -462,6 +462,11 @@ namespace ABDULLAgram.Users
             _readMessages.Add(message);
         }
         
+        internal void RemoveReadMessageInternal(Message message)
+        {
+            _readMessages.Remove(message);
+        }
+        
         // ============================================================
         // COMPOSITION: User → Folder
         // ============================================================

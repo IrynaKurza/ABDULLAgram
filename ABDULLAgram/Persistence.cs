@@ -9,10 +9,7 @@ namespace ABDULLAgram
     [Serializable]
     public class DataSnapshot
     {
-        // CHANGED: Now we have single User list instead of Regular/Premium
         public List<User> Users { get; set; } = new();
-        public List<Sent> Sents { get; set; } = new();
-        public List<Draft> Drafts { get; set; } = new();
         public List<Image> Images { get; set; } = new();
         public List<Text> Texts { get; set; } = new();
         public List<Video> Videos { get; set; } = new();
@@ -33,8 +30,6 @@ namespace ABDULLAgram
             var snap = new DataSnapshot
             {
                 Users    = new List<User>(User.GetAll()),
-                Sents    = new List<Sent>(Sent.GetAll()),
-                Drafts   = new List<Draft>(Draft.GetAll()),
                 Images   = new List<Image>(Image.GetAll()),
                 Texts    = new List<Text>(Text.GetAll()),
                 Videos   = new List<Video>(Video.GetAll()),
@@ -52,8 +47,6 @@ namespace ABDULLAgram
             if (!File.Exists(path))
             {
                 User.ClearExtent();
-                Sent.ClearExtent();
-                Draft.ClearExtent();
                 Image.ClearExtent();
                 Text.ClearExtent();
                 Video.ClearExtent();
@@ -69,25 +62,14 @@ namespace ABDULLAgram
                 var snap = (DataSnapshot)ser.Deserialize(fs);
 
                 User.ClearExtent();
-                Sent.ClearExtent();
-                Draft.ClearExtent();
                 Image.ClearExtent();
                 Text.ClearExtent();
                 Video.ClearExtent();
                 ABDULLAgram.Attachments.File.ClearExtent();
                 Sticker.ClearExtent();
 
-                // Re-add all Users
                 foreach (var user in snap.Users)
                     User.ReAdd(user);
-
-                // Re-add all messages
-                foreach (var sent in snap.Sents)
-                    Sent.ReAdd(sent);
-                foreach (var draft in snap.Drafts)
-                    Draft.ReAdd(draft);
-
-                // Re-add all attachments
                 foreach (var img in snap.Images)
                     Image.ReAdd(img);
                 foreach (var txt in snap.Texts)

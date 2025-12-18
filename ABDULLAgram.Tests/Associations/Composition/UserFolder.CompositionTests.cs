@@ -14,7 +14,7 @@ namespace ABDULLAgram.Tests.Associations.Composition
                 InitializeAsRegular(1);
             }
         }
-        
+
         [SetUp]
         public void Setup()
         {
