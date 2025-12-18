@@ -1,4 +1,5 @@
-﻿using ABDULLAgram.Chats;
+﻿using ABDULLAgram.Attachments;
+using ABDULLAgram.Chats;
 using ABDULLAgram.Messages;
 using ABDULLAgram.Users;
 
@@ -13,6 +14,13 @@ namespace ABDULLAgram.Tests.Associations.Basic
                 : base(name, "+" + name.GetHashCode(), true, 1) { }
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+            Text.ClearExtent();
+        }
+        
         [Test]
         public void MarkAsRead_SetsReverseConnection()
         {
@@ -23,9 +31,8 @@ namespace ABDULLAgram.Tests.Associations.Basic
             sender.JoinChat(chat);
             reader.JoinChat(chat);
 
-            var msg = new Sent(
-                sender,
-                chat,
+            var msg = new Text(sender, chat, "test message", false);
+            msg.InitializeAsSent(
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,
@@ -49,9 +56,8 @@ namespace ABDULLAgram.Tests.Associations.Basic
             sender.JoinChat(chat);
             reader.JoinChat(chat);
 
-            var msg = new Sent(
-                sender,
-                chat,
+            var msg = new Text(sender, chat, "test message", false);
+            msg.InitializeAsSent(
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,

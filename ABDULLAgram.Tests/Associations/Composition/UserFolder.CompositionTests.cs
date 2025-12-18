@@ -14,6 +14,12 @@ namespace ABDULLAgram.Tests.Associations.Composition
             }
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+        }
+        
         [Test]
         public void DeleteUser_DeletesAllOwnedFolders()
         {

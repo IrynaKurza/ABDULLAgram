@@ -124,7 +124,7 @@ namespace ABDULLAgram.Messages
         }
         
         // Discriminator field - determines which inner class is used
-        public MessageStateType StateType { get; private set; }
+        public MessageStateType StateType { get; set; }
         
         // Convenience properties for state checking
         public bool IsDraft => StateType == MessageStateType.Draft;
