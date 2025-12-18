@@ -389,16 +389,16 @@ namespace ABDULLAgram.Users
         // BASIC ASSOCIATION (reverse): User — read — Sent
         // ============================================================
 
-        private readonly HashSet<Sent> _readMessages = new();
-        public IReadOnlyCollection<Sent> ReadMessages =>
+        private readonly HashSet<Message> _readMessages = new();
+        public IReadOnlyCollection<Message> ReadMessages =>
             _readMessages.ToList().AsReadOnly();
 
-        internal void AddReadMessageInternal(Sent message)
+        internal void AddReadMessageInternal(Message message)
         {
             _readMessages.Add(message);
         }
 
-        internal void RemoveReadMessageInternal(Sent message)
+        internal void RemoveReadMessageInternal(Message message)
         {
             _readMessages.Remove(message);
         }
