@@ -12,6 +12,13 @@ namespace ABDULLAgram.Tests.Associations.Basic
             public TestUser(string name)
                 : base(name, "+" + name.GetHashCode(), true, 1) { }
         }
+        
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+            Premium.ClearExtent();
+        }
 
         [SetUp]
         public void Setup()
@@ -24,6 +31,10 @@ namespace ABDULLAgram.Tests.Associations.Basic
         public void MarkAsRead_SetsReverseConnection()
         {
             var reader = new TestUser("Reader");
+            var chat = new Chat(ChatType.Group) { Name = "Chat" };
+
+            sender.JoinChat(chat);
+            reader.JoinChat(chat);
 
             // Create Sent component (User/Chat are now part of Message, not Sent)
             var msg = new Sent(
@@ -44,6 +55,10 @@ namespace ABDULLAgram.Tests.Associations.Basic
         public void MarkAsRead_Twice_DoesNotDuplicate()
         {
             var reader = new TestUser("Reader");
+            var chat = new Chat(ChatType.Group) { Name = "Chat" };
+
+            sender.JoinChat(chat);
+            reader.JoinChat(chat);
 
             var msg = new Sent(
                 DateTime.Now.AddMinutes(-5),

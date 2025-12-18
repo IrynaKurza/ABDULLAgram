@@ -27,7 +27,6 @@
 
     <ItemGroup>
       <Folder Include="Core\Attachments\" />
-      <Folder Include="OLD.TESTS\" />
       <Folder Include="TestInfrastructure\" />
     </ItemGroup>
 

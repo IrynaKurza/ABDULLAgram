@@ -11,6 +11,12 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
+            Regular.ClearExtent();
+            
+            _user = new Regular("sender", "+123456789", true, 1);
+            _chat = new Chat(ChatType.Group) { Name = "Test Group" };
+            
+            _chat.AddMember(_user);
         }
 
         [Test]
@@ -41,6 +47,11 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
+            Regular.ClearExtent();
+            _user = new Regular("sender", "+987654321", true, 1);
+            _chat = new Chat(ChatType.Group) { Name = "Validation Group" };
+            
+            _chat.AddMember(_user);
         }
 
         [Test]
@@ -135,6 +146,83 @@ namespace ABDULLAgram.Tests.Core.Messages
             
             sent.DeletedAt = null;
             Assert.That(sent.DeletedAt, Is.Null);
+        }
+    }
+
+    [TestFixture]
+    public class SentPersistenceTests
+    {
+        private string TestPath => Path.Combine(TestContext.CurrentContext.WorkDirectory, "test_sent.xml");
+
+        [SetUp]
+        public void Setup()
+        {
+            Sent.ClearExtent();
+            Regular.ClearExtent();
+            Persistence.DeleteAll(TestPath);
+        }
+
+        [TearDown]
+        public void Cleanup() => Persistence.DeleteAll(TestPath);
+
+        [Test]
+        public void SaveAndLoad_PreservesAllData()
+        {
+            var u1 = new Regular("user1", "+11111", true, 1);
+            var u2 = new Regular("user2", "+22222", false, 2);
+            var c1 = new Chat(ChatType.Group) { Name = "Group1" };
+
+            c1.AddMember(u1);
+            c1.AddMember(u2);
+
+            var sendTime1 = DateTime.Now.AddMinutes(-20);
+            var sendTime2 = DateTime.Now.AddMinutes(-15);
+            
+            new Sent(u1, c1, sendTime1, sendTime1.AddMinutes(2), sendTime1.AddMinutes(5), null);
+            new Sent(u2, c1, sendTime2, sendTime2.AddMinutes(1), null, sendTime2.AddMinutes(3));
+
+            Persistence.SaveAll(TestPath);
+            Assert.That(File.Exists(TestPath), Is.True);
+
+            Sent.ClearExtent();
+            Regular.ClearExtent(); 
+            
+            var ok = Persistence.LoadAll(TestPath);
+
+            Assert.IsTrue(ok);
+            var all = Sent.GetAll().ToList();
+
+            Assert.That(all, Has.Count.EqualTo(2));
+            Assert.That(all.Any(s => s.EditedAt != null && s.DeletedAt == null));
+            Assert.That(all.Any(s => s.EditedAt == null && s.DeletedAt != null));
+        }
+
+        [Test]
+        public void Load_WhenFileMissing_ReturnsFalseAndClearsExtent()
+        {
+            var u = new Regular("temp", "+999", true, 1);
+            var c = new Chat(ChatType.Group) { Name = "G" };
+            c.AddMember(u);
+
+            new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+
+            var ok = Persistence.LoadAll("__does_not_exist__.xml");
+
+            Assert.IsFalse(ok);
+            Assert.That(Sent.GetAll(), Is.Empty);
+        }
+
+        [Test]
+        public void Save_ThrowsException_IfPathInvalid()
+        {
+            var u = new Regular("temp", "+999", true, 1);
+            var c = new Chat(ChatType.Group) { Name = "G" };
+            c.AddMember(u);
+
+            new Sent(u, c, DateTime.Now.AddMinutes(-10), DateTime.Now.AddMinutes(-5), null, null);
+
+            Assert.Throws<DirectoryNotFoundException>(() =>
+                Persistence.SaveAll("Z:/folder_does_not_exist/sent.xml"));
         }
     }
 }
