@@ -6,21 +6,22 @@ namespace ABDULLAgram.Tests.Associations.Composition
     [TestFixture]
     public class CompositionTests
     {
-
-        private class TestUser : Regular
+        private class TestUser : User
         {
-            public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1)
+            public TestUser(string name)
+                : base(name, "+" + name.GetHashCode(), true)
             {
+                InitializeAsRegular(1);
             }
         }
         
         [SetUp]
         public void Setup()
         {
-            Regular.ClearExtent();
-            Premium.ClearExtent();
+            User.ClearExtent();
+            Folder.ClearExtent();
         }
-
+        
         [Test]
         public void DeleteUser_DeletesAllOwnedFolders()
         {
@@ -30,10 +31,8 @@ namespace ABDULLAgram.Tests.Associations.Composition
 
             var initialFolderCount = Folder.GetAll().Count;
 
-            // Act - Delete user (composition)
             user.DeleteUser();
 
-            // Assert - All folders removed from extent
             Assert.That(Folder.GetAll().Count, Is.LessThan(initialFolderCount));
             Assert.That(Folder.GetAll(), Does.Not.Contain(folder1));
             Assert.That(Folder.GetAll(), Does.Not.Contain(folder2));

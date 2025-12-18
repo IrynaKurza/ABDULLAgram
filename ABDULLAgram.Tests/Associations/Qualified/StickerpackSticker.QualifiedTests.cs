@@ -11,20 +11,18 @@ namespace ABDULLAgram.Tests.Associations.Qualified
         public void Setup()
         {
             Sticker.ClearExtent();
-            Regular.ClearExtent();
-            Premium.ClearExtent();
+            User.ClearExtent();
         }
         
-        private class TestUser : Regular
+        private class TestUser : User
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, 1)
+                : base(name, "+" + name.GetHashCode(), true)
             {
+                InitializeAsRegular(1);
             }
         }
 
-
-        // TEST: Add stickers to pack
         [Test]
         public void AddSticker_AddsToPackWithEmojiCode()
         {
@@ -40,7 +38,6 @@ namespace ABDULLAgram.Tests.Associations.Qualified
             Assert.That(sticker.EmojiCode, Is.EqualTo("😀"));
         }
 
-        // TEST: Move stickers between packs
         [Test]
         public void AddSticker_MovesStickerBetweenPacks()
         {
@@ -53,14 +50,13 @@ namespace ABDULLAgram.Tests.Associations.Qualified
 
             packA.AddSticker(s1);
             packA.AddSticker(s2);
-            packB.AddSticker(s1);  // Move s1 to packB
+            packB.AddSticker(s1);
 
             Assert.That(packA.GetStickers().Count, Is.EqualTo(1));
             Assert.That(packB.GetStickers().Contains(s1), Is.True);
             Assert.That(s1.BelongsToPack, Is.EqualTo(packB));
         }
 
-        // TEST: Max 50 stickers per pack
         [Test]
         public void AddSticker_Over50_ThrowsException()
         {
@@ -74,7 +70,6 @@ namespace ABDULLAgram.Tests.Associations.Qualified
                 pack.AddSticker(new Sticker("emoji_51", Sticker.BackgroundTypeEnum.Filled)));
         }
 
-        // TEST: Pack must have at least 1 sticker
         [Test]
         public void RemoveSticker_LastOne_ThrowsException()
         {
@@ -87,7 +82,6 @@ namespace ABDULLAgram.Tests.Associations.Qualified
                 pack.RemoveSticker("😀"));
         }
         
-        // TEST: QUALIFIED - Get sticker by emojiCode (O(1) lookup)
         [Test]
         public void GetStickerByEmojiCode_ReturnsCorrectSticker()
         {
@@ -98,30 +92,25 @@ namespace ABDULLAgram.Tests.Associations.Qualified
             pack.AddSticker(sticker1);
             pack.AddSticker(sticker2);
 
-            // Act - O(1) lookup!
             var found = pack.GetStickerByEmojiCode("😎");
 
-            // Assert
             Assert.That(found, Is.EqualTo(sticker2));
         }
 
-        // TEST: QUALIFIED - Can't have duplicate emojiCodes
         [Test]
         public void AddSticker_DuplicateEmojiCode_DoesNotAddTwice()
         {
             var owner = new TestUser("Owner");
             var pack = new Stickerpack("Emojis", owner) { IsPremium = false };
             var sticker1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
-            var sticker2 = new Sticker("😀", Sticker.BackgroundTypeEnum.Filled);  // Same emoji
+            var sticker2 = new Sticker("😀", Sticker.BackgroundTypeEnum.Filled);
             
             pack.AddSticker(sticker1);
-            pack.AddSticker(sticker2);  // Should not add (same emojiCode)
+            pack.AddSticker(sticker2);
 
-            // Only first one added
             Assert.That(pack.GetStickers().Count, Is.EqualTo(1));
         }
 
-        // TEST: Remove sticker removes from pack and clears reference
         [Test]
         public void RemoveSticker_RemovesFromPackAndClearsReference()
         {

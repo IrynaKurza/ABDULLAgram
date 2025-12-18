@@ -7,24 +7,27 @@ namespace ABDULLAgram.Tests.Associations.Basic
     [TestFixture]
     public class SentReadByAssociationTests
     {
-        private class TestUser : Regular
+        private class TestUser : User
         {
             public TestUser(string name)
-                : base(name, "+" + name.GetHashCode(), true, 1) { }
+                : base(name, "+" + name.GetHashCode(), true)
+            {
+                InitializeAsRegular(1);
+            }
         }
         
         [SetUp]
         public void Setup()
         {
-            Regular.ClearExtent();
-            Premium.ClearExtent();
+            User.ClearExtent();
+            Sent.ClearExtent();
         }
-
+        
         [Test]
         public void MarkAsRead_SetsReverseConnection()
         {
-            var sender = new TestUser("Sender");
-            var reader = new TestUser("Reader");
+            var sender = new TestUser("Sender1");
+            var reader = new TestUser("Reader1");
             var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
             sender.JoinChat(chat);
@@ -49,8 +52,8 @@ namespace ABDULLAgram.Tests.Associations.Basic
         [Test]
         public void MarkAsRead_Twice_DoesNotDuplicate()
         {
-            var sender = new TestUser("Sender");
-            var reader = new TestUser("Reader");
+            var sender = new TestUser("Sender2");
+            var reader = new TestUser("Reader2");
             var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
             sender.JoinChat(chat);

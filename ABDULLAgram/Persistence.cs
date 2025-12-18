@@ -9,8 +9,8 @@ namespace ABDULLAgram
     [Serializable]
     public class DataSnapshot
     {
-        public List<Regular> Regulars { get; set; } = new();
-        public List<Premium> Premiums { get; set; } = new();
+        // CHANGED: Now we have single User list instead of Regular/Premium
+        public List<User> Users { get; set; } = new();
         public List<Sent> Sents { get; set; } = new();
         public List<Draft> Drafts { get; set; } = new();
         public List<Image> Images { get; set; } = new();
@@ -32,8 +32,7 @@ namespace ABDULLAgram
             
             var snap = new DataSnapshot
             {
-                Regulars = new List<Regular>(Regular.GetAll()),
-                Premiums = new List<Premium>(Premium.GetAll()),
+                Users    = new List<User>(User.GetAll()),
                 Sents    = new List<Sent>(Sent.GetAll()),
                 Drafts   = new List<Draft>(Draft.GetAll()),
                 Images   = new List<Image>(Image.GetAll()),
@@ -52,8 +51,7 @@ namespace ABDULLAgram
         {
             if (!File.Exists(path))
             {
-                Regular.ClearExtent();
-                Premium.ClearExtent();
+                User.ClearExtent();
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
@@ -70,8 +68,7 @@ namespace ABDULLAgram
                 using var fs = new FileStream(path, FileMode.Open);
                 var snap = (DataSnapshot)ser.Deserialize(fs);
 
-                Regular.ClearExtent();
-                Premium.ClearExtent();
+                User.ClearExtent();
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
@@ -80,45 +77,40 @@ namespace ABDULLAgram
                 ABDULLAgram.Attachments.File.ClearExtent();
                 Sticker.ClearExtent();
 
-                foreach (var r in snap.Regulars) Regular.ReAdd(r);
-                foreach (var p in snap.Premiums) Premium.ReAdd(p);
-                foreach (var s in snap.Sents)    Sent.ReAdd(s);
-                foreach (var d in snap.Drafts)   Draft.ReAdd(d);
-                foreach (var i in snap.Images)   Image.ReAdd(i);
-                foreach (var t in snap.Texts)    Text.ReAdd(t);
-                foreach (var v in snap.Videos)   Video.ReAdd(v);
-                foreach (var f in snap.Files)    ABDULLAgram.Attachments.File.ReAdd(f);
-                foreach (var st in snap.Stickers) Sticker.ReAdd(st);
+                // Re-add all Users
+                foreach (var user in snap.Users)
+                    User.ReAdd(user);
+
+                // Re-add all messages
+                foreach (var sent in snap.Sents)
+                    Sent.ReAdd(sent);
+                foreach (var draft in snap.Drafts)
+                    Draft.ReAdd(draft);
+
+                // Re-add all attachments
+                foreach (var img in snap.Images)
+                    Image.ReAdd(img);
+                foreach (var txt in snap.Texts)
+                    Text.ReAdd(txt);
+                foreach (var vid in snap.Videos)
+                    Video.ReAdd(vid);
+                foreach (var f in snap.Files)
+                    ABDULLAgram.Attachments.File.ReAdd(f);
+                foreach (var sticker in snap.Stickers)
+                    Sticker.ReAdd(sticker);
 
                 return true;
             }
             catch
             {
-                Regular.ClearExtent();
-                Premium.ClearExtent();
-                Sent.ClearExtent();
-                Draft.ClearExtent();
-                Image.ClearExtent();
-                Text.ClearExtent();
-                Video.ClearExtent();
-                ABDULLAgram.Attachments.File.ClearExtent();
-                Sticker.ClearExtent();
                 return false;
             }
         }
-        
+
         public static void DeleteAll(string path = AllPath)
         {
-            if (File.Exists(path)) File.Delete(path);
-            Regular.ClearExtent();
-            Premium.ClearExtent();
-            Sent.ClearExtent();
-            Draft.ClearExtent();
-            Image.ClearExtent();
-            Text.ClearExtent();
-            Video.ClearExtent();
-            ABDULLAgram.Attachments.File.ClearExtent();
-            Sticker.ClearExtent();
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 }

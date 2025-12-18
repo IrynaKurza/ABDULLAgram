@@ -6,12 +6,19 @@ namespace ABDULLAgram.Tests.Associations.AssociationTable
     [TestFixture]
     public class MessageAssociationTests
     {
-        private class TestUser : Regular { 
-            public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
+        private class TestUser : User
+        {
+            public TestUser(string name)
+                : base(name, "+" + name.GetHashCode(), true)
+            {
+                InitializeAsRegular(1);
+            }
         }
+        
         private class TestChat : Chat { 
             public TestChat() : base(ChatType.Group) { Name = "Test Group"; Description = "Desc"; } 
         }
+        
         private class TestMessage : ABDULLAgram.Messages.Message {
             public TestMessage(User u, Chat c) : base(u, c) { }
             private static readonly List<TestMessage> _extent = new();
@@ -29,7 +36,7 @@ namespace ABDULLAgram.Tests.Associations.AssociationTable
         [SetUp]
         public void Setup()
         {
-            Regular.ClearExtent();
+            User.ClearExtent();
             _user1 = new TestUser("Alice");
             _user2 = new TestUser("Bob");
             _chat1 = new TestChat();
@@ -52,6 +59,7 @@ namespace ABDULLAgram.Tests.Associations.AssociationTable
             Assert.That(_user1.SentMessages, Contains.Item(msg));
             Assert.That(_chat1.History, Contains.Item(msg));
         }
+        
         [Test]
         public void Constructor_SenderNotMember_ThrowsException()
         {
