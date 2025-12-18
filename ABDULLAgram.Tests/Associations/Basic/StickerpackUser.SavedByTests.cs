@@ -8,8 +8,20 @@ public class SavedByTests
     [Test]
     public void MaxSavedStickerpacks_IsCorrect()
     {
-        var r1 = new Regular("bob",  "+111", false, 2);
-        var r2 = new Regular("dina", "+222", true,  5);
+        var r1 = new User(
+            username: "bob",
+            phoneNumber: "+111",
+            isOnline: false,
+            behavior: new RegularUserBehavior(3)
+        );
+
+        var r2 = new User(
+            username: "dina",
+            phoneNumber: "+222",
+            isOnline: true,
+            behavior: new RegularUserBehavior(5)
+        );
+
 
         // Regular users have max 10 stickerpacks (polymorphism)
         Assert.That(r1.MaxSavedStickerpacks, Is.EqualTo(10));

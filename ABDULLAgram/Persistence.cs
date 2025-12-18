@@ -9,8 +9,7 @@ namespace ABDULLAgram
     [Serializable]
     public class DataSnapshot
     {
-        public List<Regular> Regulars { get; set; } = new();
-        public List<Premium> Premiums { get; set; } = new();
+        public List<User> Users { get; set; } = new();
         public List<Sent> Sents { get; set; } = new();
         public List<Draft> Drafts { get; set; } = new();
         public List<Image> Images { get; set; } = new();
@@ -29,11 +28,10 @@ namespace ABDULLAgram
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 throw new DirectoryNotFoundException($"Directory does not exist: {dir}");
-            
+
             var snap = new DataSnapshot
             {
-                Regulars = new List<Regular>(Regular.GetAll()),
-                Premiums = new List<Premium>(Premium.GetAll()),
+                Users    = new List<User>(User.GetAll()),
                 Sents    = new List<Sent>(Sent.GetAll()),
                 Drafts   = new List<Draft>(Draft.GetAll()),
                 Images   = new List<Image>(Image.GetAll()),
@@ -52,8 +50,7 @@ namespace ABDULLAgram
         {
             if (!File.Exists(path))
             {
-                Regular.ClearExtent();
-                Premium.ClearExtent();
+                User.ClearExtent();
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
@@ -70,8 +67,7 @@ namespace ABDULLAgram
                 using var fs = new FileStream(path, FileMode.Open);
                 var snap = (DataSnapshot)ser.Deserialize(fs);
 
-                Regular.ClearExtent();
-                Premium.ClearExtent();
+                User.ClearExtent();
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
@@ -80,8 +76,7 @@ namespace ABDULLAgram
                 ABDULLAgram.Attachments.File.ClearExtent();
                 Sticker.ClearExtent();
 
-                foreach (var r in snap.Regulars) Regular.ReAdd(r);
-                foreach (var p in snap.Premiums) Premium.ReAdd(p);
+                foreach (var u in snap.Users)    User.ReAdd(u);
                 foreach (var s in snap.Sents)    Sent.ReAdd(s);
                 foreach (var d in snap.Drafts)   Draft.ReAdd(d);
                 foreach (var i in snap.Images)   Image.ReAdd(i);
@@ -94,8 +89,7 @@ namespace ABDULLAgram
             }
             catch
             {
-                Regular.ClearExtent();
-                Premium.ClearExtent();
+                User.ClearExtent();
                 Sent.ClearExtent();
                 Draft.ClearExtent();
                 Image.ClearExtent();
@@ -106,12 +100,12 @@ namespace ABDULLAgram
                 return false;
             }
         }
-        
+
         public static void DeleteAll(string path = AllPath)
         {
             if (File.Exists(path)) File.Delete(path);
-            Regular.ClearExtent();
-            Premium.ClearExtent();
+
+            User.ClearExtent();
             Sent.ClearExtent();
             Draft.ClearExtent();
             Image.ClearExtent();

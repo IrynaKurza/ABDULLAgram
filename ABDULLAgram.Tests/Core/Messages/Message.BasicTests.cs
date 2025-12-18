@@ -7,8 +7,12 @@ namespace ABDULLAgram.Tests.Core.Messages
     [TestFixture]
     public class MessageAddRemoveTests
     {
-        private class TestUser : Regular { 
-            public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
+        private class TestUser : User
+        {
+            public TestUser(string name)
+                : base(name, "+" + name.GetHashCode(), true, new RegularUserBehavior(1))
+            {
+            }
         }
         private class TestChat : Chat { 
             public TestChat() : base(ChatType.Group) { Name = "Test Group"; } 
@@ -28,7 +32,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         [SetUp]
         public void Setup()
         {
-            Regular.ClearExtent();
+            User.ClearExtent();
             Sticker.ClearExtent();
             _emojiCounter = 0;
         }
