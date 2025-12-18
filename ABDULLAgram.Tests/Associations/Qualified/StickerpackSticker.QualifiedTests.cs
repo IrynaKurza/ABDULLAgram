@@ -48,6 +48,7 @@ namespace ABDULLAgram.Tests.Associations.Qualified
             var packA = new Stickerpack("PackA", ownerA) { IsPremium = false };
             var ownerB = new TestUser("OwnerB"); // FIX: Use different names for unique phone numbers!
             var packB = new Stickerpack("PackB", ownerB) { IsPremium = false };
+            
             var s1 = new Sticker("😀", Sticker.BackgroundTypeEnum.Transparent);
             var s2 = new Sticker("😎", Sticker.BackgroundTypeEnum.Filled);
 

@@ -5,11 +5,130 @@ using ABDULLAgram.Support;
 
 namespace ABDULLAgram.Chats
 {
-    [XmlInclude(typeof(Group))]
-    [XmlInclude(typeof(Private))]
     [Serializable]
-    public abstract class Chat
+    public class Chat
     {
+        // ============================================================
+        // ASSIGNMENT 7: INHERITANCE VIA COMPOSITION
+        // Private inner classes hold type-specific data
+        // Discriminator enum determines which inner class is active
+        // ============================================================
+        
+        private class GroupData
+        {
+            private int _maxParticipants = 100;
+            public int MaxParticipants
+            {
+                get => _maxParticipants;
+                set
+                {
+                    if (value <= 0)
+                        throw new ArgumentOutOfRangeException(nameof(MaxParticipants), 
+                            "MaxParticipants must be greater than zero.");
+                    _maxParticipants = value;
+                }
+            }
+
+            private string _description = "";
+            public string Description
+            {
+                get => _description;
+                set
+                {
+                    if (value is null)
+                        throw new ArgumentNullException(nameof(Description), 
+                            "Description cannot be null.");
+                    _description = value;
+                }
+            }
+        }
+        
+        private class PrivateData
+        {
+            public int MaxParticipants => 2;
+        }
+
+        // Discriminator field - determines which inner class is used
+        public ChatType ChatType { get; set; }
+
+        private GroupData? _groupData;
+        private PrivateData? _privateData;
+
+        // Constructor takes ChatType and creates appropriate inner class
+        public Chat(ChatType chatType)
+        {
+            ChatType = chatType;
+            _createdAt = DateTime.Now;
+
+            switch (chatType)
+            {
+                case ChatType.Group:
+                    _groupData = new GroupData();
+                    _privateData = null;
+                    break;
+                case ChatType.Private:
+                    _privateData = new PrivateData();
+                    _groupData = null;
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown ChatType: {chatType}");
+            }
+        }
+
+        // Parameterless constructor for XML serialization
+        public Chat()
+        {
+            _createdAt = DateTime.Now;
+            ChatType = ChatType.Group; // Default for XML
+            _groupData = new GroupData();
+        }
+
+        // Properties delegate to appropriate inner class
+        public int MaxParticipants
+        {
+            get
+            {
+                return ChatType switch
+                {
+                    ChatType.Group => _groupData!.MaxParticipants,
+                    ChatType.Private => _privateData!.MaxParticipants,
+                    _ => throw new InvalidOperationException("Invalid chat type")
+                };
+            }
+            set
+            {
+                switch (ChatType)
+                {
+                    case ChatType.Group:
+                        _groupData!.MaxParticipants = value;
+                        break;
+                    case ChatType.Private:
+                        if (value != 2)
+                            throw new ArgumentOutOfRangeException(nameof(MaxParticipants),
+                                "Private chats must have exactly 2 participants.");
+                        break;
+                    default:
+                        throw new InvalidOperationException("Invalid chat type");
+                }
+            }
+        }
+        
+        public string Description
+        {
+            get
+            {
+                if (ChatType != ChatType.Group)
+                    throw new InvalidOperationException("Description is only available for Group chats.");
+                return _groupData!.Description;
+            }
+            set
+            {
+                if (ChatType != ChatType.Group)
+                    throw new InvalidOperationException("Description is only available for Group chats.");
+                _groupData!.Description = value;
+            }
+        }
+
         // ============================================================
         // BASIC ATTRIBUTES
         // ============================================================
@@ -36,11 +155,6 @@ namespace ABDULLAgram.Chats
                     throw new ArgumentOutOfRangeException(nameof(CreatedAt), "CreatedAt cannot be in the future.");
                 _createdAt = value;
             }
-        }
-
-        protected Chat() 
-        {
-            _createdAt = DateTime.Now;
         }
 
         // ============================================================
@@ -93,8 +207,8 @@ namespace ABDULLAgram.Chats
             user.RemoveChatInternal(this);
         }
 
-        // QUALIFIED LOOKUP
-        // lookup by phone number instead of loop through all users
+        // QUALIFIED LOOKUP: This is the key feature of qualified associations!
+        // O(1) lookup by phone number instead of O(n) loop through all users
         public User? GetMemberByPhoneNumber(string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -102,7 +216,8 @@ namespace ABDULLAgram.Chats
 
             return _members.ContainsKey(phoneNumber) ? _members[phoneNumber] : null;
         }
-        
+
+        // SPECIAL METHOD for qualified associations:
         // When user changes phone number, we must update the Dictionary key!
         // Called by User.PhoneNumber setter
         public void UpdateMemberPhoneNumber(string oldPhoneNumber, string newPhoneNumber)
@@ -145,16 +260,6 @@ namespace ABDULLAgram.Chats
         
         private readonly List<Message> _history = new();
         public IReadOnlyList<Message> History => _history.AsReadOnly();
-        
-        internal void AddMessageInternal(Message message)
-        {
-            _history.Add(message);
-        }
-
-        internal void RemoveMessageInternal(Message message)
-        {
-            _history.Remove(message);
-        }
 
         // INTERNAL: Called by Message constructor
         // Message creates association when it's sent to a chat
@@ -169,7 +274,7 @@ namespace ABDULLAgram.Chats
                 // REVERSE CONNECTION
                 if (message.TargetChat != this)
                 {
-                    message.SetTargetChatInternal(this);
+                    message.TargetChat = this;
                 }
             }
         }
@@ -181,19 +286,30 @@ namespace ABDULLAgram.Chats
             if (_history.Contains(message))
             {
                 _history.Remove(message);
-                
-                // REVERSE CONNECTION
-                if (message.TargetChat == this)
-                {
-                    message.ClearTargetChatInternal();
-                }
+        
+                // REVERSE CONNECTION - use internal method instead
+                message.ClearTargetChatInternal();
             }
         }
-        
-        // ============================================================
-        // AGGREGATION: Chat ↔ Folder (reverse side)
-        // ============================================================
 
+        // INTERNAL: Called by Message.Sender setter and Delete
+        internal void AddMessageInternal(Message message)
+        {
+            if (!_history.Contains(message))
+            {
+                _history.Add(message);
+            }
+        }
+
+        internal void RemoveMessageInternal(Message message)
+        {
+            _history.Remove(message);
+        }
+
+        // ============================================================
+        // AGGREGATION: Chat ↔ Folder (0..* chats ↔ 0..* folders)
+        // ============================================================
+        
         private readonly HashSet<Folder> _folders = new();
         public IReadOnlyCollection<Folder> Folders => _folders.ToList().AsReadOnly();
 
@@ -207,5 +323,55 @@ namespace ABDULLAgram.Chats
             _folders.Remove(folder);
         }
 
+        // ============================================================
+        // BASIC ASSOCIATION: Group (0..*) — admin — User (1)
+        // Only valid for Group chats
+        // ============================================================
+        
+        private User? _admin;
+        
+        public User Admin
+        {
+            get
+            {
+                if (ChatType != ChatType.Group)
+                    throw new InvalidOperationException("Only Group chats have admins.");
+                return _admin ?? throw new InvalidOperationException("Group must have an admin.");
+            }
+        }
+
+        public void SetAdmin(User user)
+        {
+            if (ChatType != ChatType.Group)
+                throw new InvalidOperationException("Only Group chats can have admins.");
+
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (_admin == user)
+                return;
+
+            // Remove reverse connection from old admin
+            _admin?.RemoveAdminOfGroupInternal(this);
+
+            _admin = user;
+
+            // Create reverse connection (internal)
+            user.AddAdminOfGroupInternal(this);
+        }
+
+        public void KickMember(User requester, string phoneNumber)
+        {
+            if (ChatType != ChatType.Group)
+                throw new InvalidOperationException("Only Group chats support kicking members.");
+
+            if (requester == null)
+                throw new ArgumentNullException(nameof(requester));
+
+            if (_admin != requester)
+                throw new InvalidOperationException("Only admin can kick members.");
+
+            RemoveMember(phoneNumber);
+        }
     }
 }

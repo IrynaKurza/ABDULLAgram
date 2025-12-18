@@ -618,12 +618,12 @@ namespace ABDULLAgram.Users
         
         internal void AddAdminOfGroupInternal(Group group)
         {
-            _adminOfGroups.Add(group);
+            _adminOfGroups.Add(chat);
         }
         
         internal void RemoveAdminOfGroupInternal(Group group)
         {
-            _adminOfGroups.Remove(group);
+            _adminOfGroups.Remove(chat);
         }
         
         // For Stickerpack (aliases that Stickerpack.cs expects)

@@ -15,6 +15,20 @@ namespace ABDULLAgram.Tests.Associations.Basic
                 InitializeAsRegular(1);
             }
         }
+        
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+            Premium.ClearExtent();
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            Sent.ClearExtent();
+            Regular.ClearExtent();
+        }
 
         [SetUp]
         public void Setup()
@@ -33,9 +47,8 @@ namespace ABDULLAgram.Tests.Associations.Basic
             sender.JoinChat(chat);
             reader.JoinChat(chat);
 
+            // Create Sent component (User/Chat are now part of Message, not Sent)
             var msg = new Sent(
-                sender,
-                chat,
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,
@@ -60,8 +73,6 @@ namespace ABDULLAgram.Tests.Associations.Basic
             reader.JoinChat(chat);
 
             var msg = new Sent(
-                sender,
-                chat,
                 DateTime.Now.AddMinutes(-5),
                 DateTime.Now.AddMinutes(-4),
                 null,
