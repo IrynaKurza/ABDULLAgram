@@ -9,8 +9,8 @@ namespace ABDULLAgram.Tests.Associations.AssociationTable
         private class TestUser : Regular { 
             public TestUser(string name) : base(name, "+" + name.GetHashCode(), true, 1) {} 
         }
-        private class TestChat : Group { 
-            public TestChat() { Name = "Test Group"; Description = "Desc"; } 
+        private class TestChat : Chat { 
+            public TestChat() : base(ChatType.Group) { Name = "Test Group"; Description = "Desc"; } 
         }
         private class TestMessage : ABDULLAgram.Messages.Message {
             public TestMessage(User u, Chat c) : base(u, c) { }

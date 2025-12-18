@@ -8,7 +8,7 @@ public class PrivateTests
     [Test]
     public void Set_MaxParticipants_Invalid_ThrowsArgumentOutOfRangeException()
     {
-        var pChat = new Private();
+        var pChat = new Chat(ChatType.Private);
         // Private chats are strictly for 2 people
         Assert.Throws<ArgumentOutOfRangeException>(() => pChat.MaxParticipants = 3);
         Assert.Throws<ArgumentOutOfRangeException>(() => pChat.MaxParticipants = 1);
@@ -17,7 +17,7 @@ public class PrivateTests
     [Test]
     public void Set_MaxParticipants_Valid_SetsValue()
     {
-        var pChat = new Private();
+        var pChat = new Chat(ChatType.Private);
         pChat.MaxParticipants = 2;
         Assert.That(pChat.MaxParticipants, Is.EqualTo(2));
     }

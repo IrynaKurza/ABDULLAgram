@@ -12,13 +12,20 @@ namespace ABDULLAgram.Tests.Associations.Basic
             public TestUser(string name)
                 : base(name, "+" + name.GetHashCode(), true, 1) { }
         }
+        
+        [SetUp]
+        public void Setup()
+        {
+            Regular.ClearExtent();
+            Premium.ClearExtent();
+        }
 
         [Test]
         public void MarkAsRead_SetsReverseConnection()
         {
             var sender = new TestUser("Sender");
             var reader = new TestUser("Reader");
-            var chat = new Group { Name = "Chat" };
+            var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
             sender.JoinChat(chat);
             reader.JoinChat(chat);
@@ -44,7 +51,7 @@ namespace ABDULLAgram.Tests.Associations.Basic
         {
             var sender = new TestUser("Sender");
             var reader = new TestUser("Reader");
-            var chat = new Group { Name = "Chat" };
+            var chat = new Chat(ChatType.Group) { Name = "Chat" };
 
             sender.JoinChat(chat);
             reader.JoinChat(chat);

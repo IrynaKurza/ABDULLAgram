@@ -25,7 +25,7 @@ namespace ABDULLAgram.Tests.Associations.Aggregation
         {
             var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
-            var chat = new Group { Name = "General" };
+            var chat = new Chat(ChatType.Group) { Name = "General" };
 
             folder.AddChat(chat);
 
@@ -38,7 +38,7 @@ namespace ABDULLAgram.Tests.Associations.Aggregation
         {
             var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
-            var chat = new Group { Name = "General" };
+            var chat = new Chat(ChatType.Group) { Name = "General" };
 
             folder.AddChat(chat);
             folder.RemoveChat(chat);
@@ -55,11 +55,11 @@ namespace ABDULLAgram.Tests.Associations.Aggregation
 
             for (int i = 0; i < 100; i++)
             {
-                folder.AddChat(new Group { Name = "Chat " + i });
+                folder.AddChat(new Chat(ChatType.Group) { Name = "Chat " + i });
             }
 
             Assert.Throws<InvalidOperationException>(() =>
-                folder.AddChat(new Group { Name = "Overflow" }));
+                folder.AddChat(new Chat(ChatType.Group) { Name = "Overflow" }));
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace ABDULLAgram.Tests.Associations.Aggregation
         {
             var user = new TestUser("Alice");
             var folder = user.CreateFolder("Work");
-            var chat = new Group { Name = "General" };
+            var chat = new Chat(ChatType.Group) { Name = "General" };
 
             folder.AddChat(chat);
             folder.Delete();
