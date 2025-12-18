@@ -10,8 +10,7 @@ public class IntegrationTests
     [SetUp]
     public void SetUp()
     {
-        Regular.ClearExtent();
-        Premium.ClearExtent();
+        User.ClearExtent();
     }
 
     // TEST: Complex scenario with multiple associations

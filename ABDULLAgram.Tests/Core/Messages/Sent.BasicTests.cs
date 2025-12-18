@@ -11,7 +11,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent();
+            User.ClearExtent();
             
             _user = new Regular("sender", "+123456789", true, 1);
             _chat = new Chat(ChatType.Group) { Name = "Test Group" };
@@ -158,7 +158,7 @@ namespace ABDULLAgram.Tests.Core.Messages
         public void Setup()
         {
             Sent.ClearExtent();
-            Regular.ClearExtent();
+            User.ClearExtent();
             Persistence.DeleteAll(TestPath);
         }
 
@@ -185,7 +185,7 @@ namespace ABDULLAgram.Tests.Core.Messages
             Assert.That(File.Exists(TestPath), Is.True);
 
             Sent.ClearExtent();
-            Regular.ClearExtent(); 
+            User.ClearExtent(); 
             
             var ok = Persistence.LoadAll(TestPath);
 
