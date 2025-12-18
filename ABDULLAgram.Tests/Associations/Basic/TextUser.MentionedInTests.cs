@@ -6,14 +6,13 @@ namespace ABDULLAgram.Tests.Associations.Basic
 {
     internal class TestUserForText : User
     {
+        public override int MaxSavedStickerpacks => 10;
+
         public TestUserForText()
-            : base(
-                "TestUser",
-                "555-0199",
-                true,
-                new RegularUserBehavior(1)
-            )
         {
+            Username = "TestUser";
+            PhoneNumber = "555-0199"; 
+            IsOnline = true;
         }
     }
 
